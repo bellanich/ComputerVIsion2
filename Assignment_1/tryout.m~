@@ -1,0 +1,12 @@
+% just to try out some code and get used to the data
+
+% addpath('./SupplementalCode')
+
+s = load('source.mat')
+s
+size(s.source)
+
+t = load('target.mat')
+size(t.target)
+
+p = ./SupplementalCode/readPcD('0000000000.pcd')
