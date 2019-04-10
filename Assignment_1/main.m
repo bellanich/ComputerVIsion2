@@ -10,24 +10,29 @@ addpath('./SupplementalCode')
 % please note...    ./ is current node
 datapath = '../../data/';
 
-s = load('source.mat');
-size(s.source);
-t = load('target.mat');
-size(t.target);
+source = load('source.mat');
+size(source.source);
+target = load('target.mat');
+size(target.target);
 
 %{
 BaseCloud = readPcd([datapath, '0000000013_normal.pcd']);
 TargetCloud = readPcd([datapath, '0000000000.pcd']);
 %}
 
-%% ICP
+%% ICP method is tested on source.mat and target.mat
 
-selectionType = 1
-nr_samples = 20         %only used for selectionType = 2 or 3
+selectionType = 3       % 1 = use all the points (a)
+                        % 2 = sample subset of points (b)
+                        % 3 = sample subset of points every iteration (c)
+                        % 4 = sample from points of interest (d)
+                        % 4 is NOT implemented yet
+                        
+nr_samples = 25         % only used for selectionType = 2 or 3
 maxIterations = 100;
 diffRMS = 0.0005;       % convergence if small improvement in RMS
 
-[RMS, message, Rot, trans] = detICP(s.source', t.target', selectionType, nr_samples, maxIterations, diffRMS)
+[RMS, message, Rot, trans] = detICP(source.source', target.target', selectionType, nr_samples, maxIterations, diffRMS)
 
 %====================================================
 %  helper function
@@ -51,18 +56,20 @@ function [RMS, message, R, t] = detICP(source, target, selectionType,  nr_sample
             sampleInd = [];
     end
     
+    % start the loop
     ii = 1;
     oldRMS = 1000000000;
     
-    [~, psiT, ~, ~] = det_matching(source, target);    
-    RMS = calc_RMS(sourceRotated, psiT)  % this is our loss function to minimize
+    % psiT is the target reordered in such a way that points correspond with points in source 
+    [~, targetPsi, ~, ~] = det_matching(source, target);    
+    RMS = calc_RMS(sourceRotated, targetPsi)  % this is our loss function to minimize
      
     while (ii < maxIterations & (oldRMS-RMS > diffRMS))
         oldRMS = RMS;
-        [~, psiT, ~, ~ ] = det_matching(sourceRotated, target);
-        [R, t] = detRotation(sourceRotated, psiT, selectionType, sampleInd, nr_samples);
+        [~, targetPsi, ~, ~ ] = det_matching(sourceRotated, target);
+        [R, t] = detRotation(sourceRotated, targetPsi, selectionType, sampleInd, nr_samples);
         sourceRotated = (R * sourceRotated' + t)';
-        RMS = calc_RMS(sourceRotated, psiT)
+        RMS = calc_RMS(sourceRotated, targetPsi)
         ii = ii + 1;
     end
     if ii == maxIterations
@@ -77,6 +84,8 @@ function [R, t] = detRotation(source, psiTarget, selectionType, sampleInd, nr_sa
     % source is the rotated source (N x 3)
     % psiTarget is the psiTarget (so closed points attached)
     %
+    % dependent on selectionType the number of points are determined used
+    % for calcuating the best R and t.
     % sampleInd only used if selectionType == 2
     % nr_samples only used if selectionType == 3
     switch selectionType
@@ -84,11 +93,11 @@ function [R, t] = detRotation(source, psiTarget, selectionType, sampleInd, nr_sa
             N = size(source, 1);
             P = source;
             Q = psiTarget;
-        case 2    % given sample of points
+        case 2    % given sample of points (sampleInd)
             N = length(sampleInd);
             P = source(sampleInd, :);
             Q = psiTarget(sampleInd, :);
-        case 3    % every iteration new sample
+        case 3    % every iteration new sample of size nr_samples
             Nmax = size(source, 1);
             N = nr_samples;          % parameter: number of samples
             sampleInd = randi(Nmax, N, 1);
