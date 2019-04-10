@@ -26,7 +26,7 @@ p = s.source(:, 1:N)'
 q = t.target(:, psi)'
 % step1 - determine weighted cetroids of p and q
 % note: weighting w = 1 for all points
-pc = sum(p, 1)/N;
+pc = sum(p, 1)/N
 qc = sum(q, 1)/N;
 % step2 - centered vectors -> matrices D x N
 X = (p - pc)'
@@ -34,6 +34,16 @@ Y = (q - qc)'
 % step3 - determine covariance matrix S = XWY'
 W = eye(N)    % all weights are = 1
 S = X*W*Y'
+% step 4 - singular value decomposition
+[U Sigma Vt] = svd(S)
+V = Vt'
+s = svd(S)
+Nr = size(Sigma, 1)
+rot = eye(Nr);
+rot(Nr, Nr) = det(V*U')
+R = V*rot*U'
+% Step 5 - optimal translation
+t = qc' - R*pc'
 
 %====================================================
 %  helper function
