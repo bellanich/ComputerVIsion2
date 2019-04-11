@@ -1,38 +1,39 @@
 
-
-function [RMS, message, R, t] = ICP(source, target, selectionType,  nr_samples, maxIterations, diffRMS)
+function [RMS, message, R, t] = ...
+    ICP (source, target, selectionType,  nr_samples, maxIterations, diffRMS)
    
     % Initilize R, tr, RMS
     dim = 3;
     R = eye(dim);
     t = zeros(dim, 1);
-    sourceRotated = source;    % init: no rotation or translation
-    
-    % if selectionType == 2, then initialize sample indices
-    if selectionType == 2
-            disp('selectionType=2 - fixed nr of samples')
-            Nmax = size(source, 1);
-            N = nr_samples;   
-            sampleInd = randi(Nmax, N, 1);
-    else
-            sampleInd = [];
-    end
-    
-    % start the loop
+    RMS = 1000000000000;   
+    oldRMS = 2*RMS;
     ii = 1;
-    oldRMS = 1000000000;
     
-    % psiT is the target reordered in such a way that points correspond with points in source 
-    [~, targetPsi, ~, ~] = det_matching(source, target);    
-    RMS = calc_RMS(sourceRotated, targetPsi)  % this is our loss function to minimize
-     
-    while (ii < maxIterations & (oldRMS-RMS > diffRMS))
-        oldRMS = RMS;
-        [~, targetPsi, ~, ~ ] = det_matching(sourceRotated, target);
-        [R, t] = detRotation(sourceRotated, targetPsi, selectionType, sampleInd, nr_samples);
-        sourceRotated = (R * sourceRotated' + t)';
-        RMS = calc_RMS(sourceRotated, targetPsi)
+    % initialze sample
+    if selectionType == 1    % all points
+        sourceSample = source;
+    elseif selectionType == 2   % random points, fixed for all iterations
+        sampleInd = selectRandom(source, nr_samples);
+        sourceSample = source(sampleInd, :);
+    end
+        
+    while (ii < maxIterations & (oldRMS-RMS > diffRMS | RMS > oldRMS))
         ii = ii + 1;
+        if selectionType == 3   % new sample points for each iteration
+            sampleInd = selectRandom(source, nr_samples);
+            sourceSample = source(sampleInd, :);
+        end
+        
+        % Rotate
+        sourceRotatedSample = (R * sourceSample' + t)';
+        % Match
+        [~, targetPsi, ~ , ~ ] = det_matching(sourceRotatedSample, target);        
+        % New RMS
+        oldRMS = RMS;
+        RMS = calc_RMS(sourceRotatedSample, targetPsi)
+        % New R and t
+        [R, t] = detRotation(sourceSample, targetPsi);
     end
     if ii == maxIterations
         message = 'maxIterations reached';
@@ -41,34 +42,21 @@ function [RMS, message, R, t] = ICP(source, target, selectionType,  nr_samples, 
     end 
 end
 
-function [R, t] = detRotation(source, psiTarget, selectionType, sampleInd, nr_samples)
+function [sampleInd] = selectRandom(source, nr_samples)
+    Nmax = size(source ,1);
+    N = nr_samples;
+    sampleInd = randi(Nmax, N, 1);
+end
+
+function [R, t] = detRotation(source, psiTarget)
     % determine R and t with SVD
-    % source is the rotated source (N x 3)
+    % source is the sampled source (N x 3)
     % psiTarget is the psiTarget (so closed points attached)
-    %
-    % dependent on selectionType the number of points are determined used
-    % for calcuating the best R and t.
-    % sampleInd only used if selectionType == 2
-    % nr_samples only used if selectionType == 3
-    switch selectionType
-        case 1    % all points
-            N = size(source, 1);
-            P = source;
-            Q = psiTarget;
-        case 2    % given sample of points (sampleInd)
-            N = length(sampleInd);
-            P = source(sampleInd, :);
-            Q = psiTarget(sampleInd, :);
-        case 3    % every iteration new sample of size nr_samples
-            Nmax = size(source, 1);
-            N = nr_samples;          % parameter: number of samples
-            sampleInd = randi(Nmax, N, 1);
-            P = source(sampleInd, :);
-            Q = psiTarget(sampleInd, :);
-        otherwise
-            disp('det_matching: this selectionType not supported!')
-    end
-    % step1 - determine weighted cetroids of p and q
+    %    
+    N = size(source, 1);
+    P = source;
+    Q = psiTarget;
+    % step1 - determine weighted centroids of p and q
     % note: weighting w = 1 for all points
     pc = sum(P, 1)/N;
     qc = sum(Q, 1)/N;
@@ -81,14 +69,14 @@ function [R, t] = detRotation(source, psiTarget, selectionType, sampleInd, nr_sa
     W = eye(N);    % all weights are = 1
     S = X*W*Y';
     % step 4 - singular value decomposition
-    [U Sigma V] = svd(S);
+    [U, Sigma, V] = svd(S);
     s = svd(S);
     Nr = size(Sigma, 1);
     rot = eye(Nr);
     rot(Nr, Nr) = det(V*U');
     R = V*rot*U';
     % Step 5 - optimal translation
-    t = qc' - R*pc';
+    t = qc' - R * pc' ;
 end
 
 function [psi, psiTarget, sampledSource, psiDistances] = det_matching(source, target)
@@ -99,15 +87,44 @@ function [psi, psiTarget, sampledSource, psiDistances] = det_matching(source, ta
     psi = [];
     psiTarget = [];
     psiDistances = [];
-    N = size(source, 1);
-    % N = 5   % for testing
-    for ii = 1:N
-        point = source(ii, :);
-        [closestIndex, closestPoint, minDistance] = findClosestPoint(point, target);
-        sampledSource = cat(1, sampledSource, point);
-        psiTarget = cat(1, psiTarget, closestPoint);
-        psi = cat(1, psi, closestIndex);
-        psiDistances = cat(1, psiDistances, minDistance);
+    selectionType = 1;    % TODO change code
+    switch selectionType
+        case 1    % all points
+            N = size(source, 1);
+            % N = 5   % for testing
+            for ii = 1:N
+                point = source(ii, :);
+                [closestIndex, closestPoint, minDistance] = findClosestPoint(point, target);
+                sampledSource = cat(1, sampledSource, point);
+                psiTarget = cat(1, psiTarget, closestPoint);
+                psi = cat(1, psi, closestIndex);
+                psiDistances = cat(1, psiDistances, minDistance);
+            end            
+        case 2    % given sample of points (sampleInd)
+            N = length(sampleInd);
+            for ii = 1:N
+                point = source(sampleInd(ii), :);
+                [closestIndex, closestPoint, minDistance] = findClosestPoint(point, target);
+                sampledSource = cat(1, sampledSource, point);
+                psiTarget = cat(1, psiTarget, closestPoint);
+                psi = cat(1, psi, closestIndex);
+                psiDistances = cat(1, psiDistances, minDistance);
+            end      
+        case 3    % every iteration new sample of size nr_samples
+            Nmax = size(source, 1);
+            N = 50;
+            % N = nr_samples;          % parameter: number of samples
+            sampleInd = randi(Nmax, N, 1);
+            for ii = 1:N
+                point = source(sampleInd(ii), :);
+                [closestIndex, closestPoint, minDistance] = findClosestPoint(point, target);
+                sampledSource = cat(1, sampledSource, point);
+                psiTarget = cat(1, psiTarget, closestPoint);
+                psi = cat(1, psi, closestIndex);
+                psiDistances = cat(1, psiDistances, minDistance);
+            end        
+        otherwise
+            disp('det_matching: this selectionType not supported!')
     end
 end
 
@@ -119,7 +136,7 @@ function [closestIndex, closestPoint, minDistance] = findClosestPoint(point, tar
     % is closest to point. 
     distances = pdist2(target, point);
     minDistance = min(distances);
-    closestIndex = find(distances == minDistance);
+    closestIndex = min(find(distances == minDistance));    % min if more points are closest
     closestPoint = target(closestIndex, :);
 end
 

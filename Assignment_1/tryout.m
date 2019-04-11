@@ -42,3 +42,12 @@ Y2 = a3(:, 2);
 Z2 = a3(:, 3);
 C2 = a3(:, 4);
 fscatter3(X2, Y2, Z2, C2)
+
+R = load('R.mat')
+t = load('t.mat')
+
+target = readPcd([datapath, '0000000000.pcd']);
+source = readPcd([datapath, '0000000001.pcd']);
+size(source)
+size(R)
+sourceRot = [R*source'+t]'
