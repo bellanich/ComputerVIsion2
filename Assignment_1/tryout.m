@@ -5,14 +5,14 @@
 addpath('./SupplementalCode') 
 % please note...    ./ is current node
 
-datapath = '../../data/'
+datapath = 'Data/';
 
-s = load('source.mat')
+s = load([datapath, 'source.mat']);
 
-size_s = size(s.source, 2)
+size_s = size(s.source, 2);
 
-t = load('target.mat')
-size_t = size(t.target)
+t = load([datapath, 'Data/target.mat']);
+size_t = size(t.target);
 
 a1 = readPcd([datapath, '0000000013_normal.pcd']);
 a2 = readPcd([datapath, '0000000000.pcd']);
