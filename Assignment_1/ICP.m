@@ -87,45 +87,17 @@ function [psi, psiTarget, sampledSource, psiDistances] = det_matching(source, ta
     psi = [];
     psiTarget = [];
     psiDistances = [];
-    selectionType = 1;    % TODO change code
-    switch selectionType
-        case 1    % all points
-            N = size(source, 1);
-            % N = 5   % for testing
-            for ii = 1:N
-                point = source(ii, :);
-                [closestIndex, closestPoint, minDistance] = findClosestPoint(point, target);
-                sampledSource = cat(1, sampledSource, point);
-                psiTarget = cat(1, psiTarget, closestPoint);
-                psi = cat(1, psi, closestIndex);
-                psiDistances = cat(1, psiDistances, minDistance);
-            end            
-        case 2    % given sample of points (sampleInd)
-            N = length(sampleInd);
-            for ii = 1:N
-                point = source(sampleInd(ii), :);
-                [closestIndex, closestPoint, minDistance] = findClosestPoint(point, target);
-                sampledSource = cat(1, sampledSource, point);
-                psiTarget = cat(1, psiTarget, closestPoint);
-                psi = cat(1, psi, closestIndex);
-                psiDistances = cat(1, psiDistances, minDistance);
-            end      
-        case 3    % every iteration new sample of size nr_samples
-            Nmax = size(source, 1);
-            N = 50;
-            % N = nr_samples;          % parameter: number of samples
-            sampleInd = randi(Nmax, N, 1);
-            for ii = 1:N
-                point = source(sampleInd(ii), :);
-                [closestIndex, closestPoint, minDistance] = findClosestPoint(point, target);
-                sampledSource = cat(1, sampledSource, point);
-                psiTarget = cat(1, psiTarget, closestPoint);
-                psi = cat(1, psi, closestIndex);
-                psiDistances = cat(1, psiDistances, minDistance);
-            end        
-        otherwise
-            disp('det_matching: this selectionType not supported!')
-    end
+    
+    N = size(source, 1);
+    % N = 5   % for testing
+    for ii = 1:N
+        point = source(ii, :);
+        [closestIndex, closestPoint, minDistance] = findClosestPoint(point, target);
+        sampledSource = cat(1, sampledSource, point);
+        psiTarget = cat(1, psiTarget, closestPoint);
+        psi = cat(1, psi, closestIndex);
+        psiDistances = cat(1, psiDistances, minDistance);
+    end            
 end
 
 function [closestIndex, closestPoint, minDistance] = findClosestPoint(point, target)

@@ -19,7 +19,7 @@ Atarget = load([datapath, 'target.mat']);
 
 % set ICP parameters
 
-selectionType = 2;      % 1 = use all the points (a)
+selectionType = 3;      % 1 = use all the points (a)
                         % 2 = sample subset of points (b)
                         % 3 = sample subset of points every iteration (c)
                         % 4 = sample from points of interest (d)
