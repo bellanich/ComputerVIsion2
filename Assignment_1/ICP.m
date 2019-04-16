@@ -16,6 +16,27 @@ function [RMS, message, R, t] = ...
     elseif selectionType == 2   % random points, fixed for all iterations
         sampleInd = selectRandom(source, nr_samples);
         sourceSample = source(sampleInd, :);
+    elseif selectionType == 4  % points from densest clusters
+        %  ------ Parameters to change ----------
+        K = 25; %= nr_samples;
+        nDensestClusters = 3; % sample from n densest cluster
+    
+        %  ----- Redefining source as only the points from the densest clusters ------
+        [idx, clusterMeans]= kmeans(source, K);
+        % Identify the densest clusters
+        pointsPerCluster = histcounts(idx);
+        [B, clustersToSample] = maxk(pointsPerCluster, nDensestClusters);
+        % Pull datapoints from all denest clusters and rename as Source2
+        densePoints_idx = find(ismember(idx, clustersToSample));
+        source2 = source(densePoints_idx,:);
+      
+        %  ----- Randomly selecting samples from redfined source ------
+        sourceSample = [];
+        for sample = 1:nr_samples
+            % Randomly sample a single datapoint from source2
+            datapoint = source2(randi(size(source2,1)),:);
+            sourceSample = [sourceSample; datapoint]; 
+        end
     end
         
     while (ii < maxIterations & (oldRMS-RMS > diffRMS | RMS > oldRMS))
