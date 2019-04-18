@@ -41,8 +41,8 @@ diffRMS = 0.0005;       % convergence if small improvement in RMS
 
 %  R is 3x3 and t is 3x1. A column and row added for being able to rotate
 %  the N x 4 point clouds, while keepint the 4th column
-RCol = cat(2, cat(1, R, [0, 0, 0]), [0; 0; 0; 1])
-tCol = cat(1, t, 0)
+RCol = cat(2, cat(1, R, [0, 0, 0]), [0; 0; 0; 1]);
+tCol = cat(1, t, 0);
 
 %  here we rotate the source and plot them - these fit quite nice the
 %  target (original)
