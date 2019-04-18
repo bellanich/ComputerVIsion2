@@ -52,7 +52,7 @@ function [RMS, message, R, t] = ...
         [~, targetPsi, ~ , ~ ] = det_matching(sourceRotatedSample, target);        
         % New RMS
         oldRMS = RMS;
-        RMS = calc_RMS(sourceRotatedSample, targetPsi)
+        RMS = calc_RMS(sourceRotatedSample, targetPsi);
         % New R and t
         [R, t] = detRotation(sourceSample, targetPsi);
     end

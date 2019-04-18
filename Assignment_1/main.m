@@ -12,7 +12,7 @@ datapath = './Data/';
 
 
 Htarget = readPcd([datapath, '0000000000.pcd']);
-Hsource = readPcd([datapath, '0000000010.pcd']);
+Hsource = readPcd([datapath, '0000000011.pcd']);
 % remove all z > 1;
 Htarget = Htarget(Htarget(:, 3)<1, :);
 Hsource = Hsource(Hsource(:, 3)<1, :);
@@ -37,7 +37,7 @@ nr_samples = 500;        % only used for selectionType = 2 or 3
 maxIterations = 100;
 diffRMS = 0.0005;       % convergence if small improvement in RMS
 
-[RMS, message, R, t] = ICP(Hsource3, Htarget3, selectionType, nr_samples, maxIterations, diffRMS)
+[RMS, message, R, t] = ICP(Hsource3, Htarget3, selectionType, nr_samples, maxIterations, diffRMS);
 
 %  R is 3x3 and t is 3x1. A column and row added for being able to rotate
 %  the N x 4 point clouds, while keepint the 4th column
@@ -47,7 +47,14 @@ tCol = cat(1, t, 0);
 %  here we rotate the source and plot them - these fit quite nice the
 %  target (original)
 HsourceRotated = (RCol * Hsource' + tCol)';
-plotCloud(HsourceRotated, 'rotated')
+
+%% merging
+Hmerged = [Htarget; HsourceRotated];
+plotCloud(Hmerged, 'merged')
+
+%%
+
+% plotCloud(HsourceRotated, 'rotated')
 
 % ==================================================================================
 % helper function
