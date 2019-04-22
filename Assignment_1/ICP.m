@@ -1,5 +1,5 @@
 
-function [RMS, message, R, t] = ...
+function [RMS, message, R, t, listRMS, ii] = ...
     ICP (source, target, selectionType,  nr_samples, maxIterations, diffRMS)
    
     % Initilize R, tr, RMS
@@ -8,6 +8,7 @@ function [RMS, message, R, t] = ...
     t = zeros(dim, 1);
     RMS = 1000000000000;   
     oldRMS = 2*RMS;
+    listRMS = [];
     ii = 1;
     
     % initialze sample
@@ -53,13 +54,14 @@ function [RMS, message, R, t] = ...
         % New RMS
         oldRMS = RMS;
         RMS = calc_RMS(sourceRotatedSample, targetPsi);
+        listRMS = [listRMS, RMS]; 
         % New R and t
         [R, t] = detRotation(sourceSample, targetPsi);
     end
     if ii == maxIterations
         message = 'maxIterations reached';
     elseif oldRMS-RMS < diffRMS
-        message = ['convergence in: ', num2str(ii),  ' steps'];
+        message = ['convergence in: ', num2str(ii),  ' steps and time:', datestr(now, 'MM:SS.FFF')];
     end 
 end
 

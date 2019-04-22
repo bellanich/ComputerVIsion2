@@ -1,4 +1,4 @@
-% Testing ICP on accuracy, stability hyperparameters etc.
+% Testing ICP with added Noise.
 
 clear all
 clc
@@ -18,20 +18,25 @@ Atarget = load([datapath, 'target.mat']);
 
 % set ICP parameters
 
-selectionType = 2;     % 1 = use all the points (a)
+selectionType = 1;     % 1 = use all the points (a)
                         % 2 = sample subset of points (b)
                         % 3 = sample subset of points every iteration (c)
                         % 4 = sample from points of interest (d)
                     
                         
-nr_samples = 20;        % only used for selectionType = 2, 3 and 4
+nr_samples = 200;        % only used for selectionType = 2, 3 and 4
 maxIterations = 300;    % max if no convergence
 diffRMS = 0.0002;       % convergence if small improvement in RMS
 
-listAvgRMS = [];
-% list_nr_samples = [20 50 100 200 300 500 700 1000 1500]
-list_nr_samples = [100 200]
-for nr_samples = list_nr_samples
+listPercNoise = [0.0 0.01 0.02 0.05 0.1]
+listAvgRMSNoise = []
+for percNoise = listPercNoise
+
+    nrNoise = round(size(Asource.source', 1) * percNoise)
+    NoisedSource = addNoise(Asource.source', nrNoise);
+
+    listAvgRMS = [];
+
 
         nrTests = 20;
         reportSteps = [];
@@ -39,7 +44,10 @@ for nr_samples = list_nr_samples
         for ii = 1:nrTests
     
             [RMS, message, R, t, listRMS, nrIterations] = ...
-                ICP(Asource.source', Atarget.target', selectionType, nr_samples, maxIterations, diffRMS);
+                ICP(NoisedSource, Atarget.target', selectionType, nr_samples, maxIterations, diffRMS);
+       
+            % [RMS, message, R, t, listRMS, nrIterations] = ...
+            %     ICP(Asource.source', Atarget.target', selectionType, nr_samples, maxIterations, diffRMS);
  
             % message
             reportSteps = [reportSteps, nrIterations];
@@ -53,17 +61,26 @@ for nr_samples = list_nr_samples
         avgSteps = mean(reportSteps)
         listAvgRMS = [listAvgRMS, avgRMS];
 
+    listAvgRMSNoise = [listAvgRMSNoise, avgRMS]
+   
 end
 
 figure
-plot(list_nr_samples, listAvgRMS)
-title('Elbow')
-xlabel('sample size')
+plot(listPercNoise, listAvgRMSNoise)
+title('Noise dependency')
+xlabel('noise percentage')
 ylabel('RMS')
-axis([0 1500 0.15 0.23])
+axis([0 0.1 0.15 0.35])
 
-figure
-plot(listRMS, '-o')
-title('RMS per iteration')
-xlabel('step')
-ylabel('RMS')
+function NoisedSource = addNoise(source, nrNoise)
+    % Bsource = Asource.source';     % use for adding noise
+    % percNoise = 0.1
+    % nrNoise = round(size(Bsource, 1) * percNoise)
+    % size(Bsource)
+    % min(Bsource);
+    % max(Bsource);
+    % max(Bsource) - min(Bsource);
+    N = rand(nrNoise,3) .* (max(source)-min(source)) + min(source);
+    NoisedSource = cat(1, source, N);
+    % size(Nsource)
+end
