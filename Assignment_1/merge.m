@@ -13,7 +13,7 @@ selectionType = 3;      % 1 = use all the points (a)
                         % 3 = sample subset of points every iteration (c)
                         % 4 = sample from points of interest (d)
                         
-nr_samples = 5000;        % only used for selectionType = 2 or 3
+nr_samples = 500;        % only used for selectionType = 2 or 3
 maxIterations = 100;
 diffRMS = 0.0005;       % convergence if small improvement in RMS
 sampling_rate = 1;
@@ -57,11 +57,11 @@ for i = 1:size(selection, 2)
     
     progressbar(i/size(selection, 2))
 end
+meanRMS = mean(RMS_of_clouds);
 
 %%
 first_cloud = point_clouds(:,:,1);
 merged_cloud = first_cloud(first_cloud(:, 3) < 1, :);
-plotCloud(merged_cloud, '1st cloud')
 %%
 for j = 1:size(selection, 2)
     
@@ -86,7 +86,8 @@ for j = 1:size(selection, 2)
     end
     merged_cloud = [merged_cloud; rotated_cloud]; 
 end
-plotCloud(merged_cloud, 'Merged')
+filename = ['Merged_sr', sampling_rate, '_mRMS', meanRMS, '.fig'];
+plotCloud(merged_cloud, 'Merged', filename)
 %%
 % ================
 % Helper functions
@@ -117,7 +118,7 @@ function selection = create_selection(step_size)
 end
 
 
-function plotCloud (pointCloud, figure_title)
+function plotCloud (pointCloud, figure_title, filename)
     % pointCLoud should be N X 4 matrix
     figure
     X = pointCloud(:, 1);
@@ -126,5 +127,6 @@ function plotCloud (pointCloud, figure_title)
     C = pointCloud(:, 4);
     fscatter3(X, Y, Z, C);
     title = figure_title;
+    savefig(['plots/', filename]);
 end
 
