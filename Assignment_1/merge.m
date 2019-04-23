@@ -1,8 +1,4 @@
-function merged_cloud = merge(method, sampling_rate, )
-
-    clear all
-    clc
-    close all
+function [merged_cloud, meanRMS, mean_time] = merge(method, sampling_rate)
 
     %MERGE merge all point clouds into each other
     %   The point clouds will be merged into each other two different
@@ -15,30 +11,27 @@ function merged_cloud = merge(method, sampling_rate, )
                             % 3 = sample subset of points every iteration (c)
                             % 4 = sample from points of interest (d)
 
-    nr_samples = 5000;        % only used for selectionType = 2 or 3
-    maxIterations = 100;
+    nr_samples = 500;        % only used for selectionType = 2 or 3
+    maxIterations = 500;
     diffRMS = 0.0005;       % convergence if small improvement in RMS
 
     % load point clouds
     point_clouds = load_point_clouds();
-
-    method = 'combined_merge';
     
     switch method
         case 'separated_merge'
             
-%             sampling_rate = 2;
-            [merged_cloud, meanRMS] = separated_merge(selectionType, nr_samples, ...
+            [merged_cloud, meanRMS, mean_time] = separated_merge(selectionType, nr_samples, ...
                                                     maxIterations, diffRMS, ...
                                                     sampling_rate, point_clouds);
 
             % plot merged clouds
-            figure_name = ['Merged_sr', sampling_rate, '_mRMS', meanRMS, '.fig'];
+            figure_name = ['Merged_sr', num2str(sampling_rate), '_mRMS', num2str(meanRMS), '.fig'];
             plotCloud(merged_cloud, 'Merged', figure_name);
         
         case 'combined_merge'
             
-            [merged_cloud, meanRMS] = combined_merge(selectionType, ...
+            [merged_cloud, meanRMS, mean_time] = combined_merge(selectionType, ...
                         nr_samples, maxIterations, diffRMS, point_clouds);
                     
             % plot merged clouds
@@ -47,7 +40,7 @@ function merged_cloud = merge(method, sampling_rate, )
             
         otherwise
             
-            disp('please enter "separated_merge" or "combined_merge"')
+            disp('please enter "separated_merge" or "combined_merge"');
 
     end
 end
@@ -93,7 +86,7 @@ function plotCloud (pointCloud, figure_title, filename)
     savefig(['Plots/', filename]);
 end
 
-function [merged_cloud, meanRMS] = separated_merge(selectionType, nr_samples, maxIterations, diffRMS, sampling_rate, point_clouds)
+function [merged_cloud, meanRMS, mean_time] = separated_merge(selectionType, nr_samples, maxIterations, diffRMS, sampling_rate, point_clouds)
 %     % create selection
 %     selection = create_selection(sampling_rate);
 % 
@@ -164,6 +157,7 @@ function [merged_cloud, meanRMS] = separated_merge(selectionType, nr_samples, ma
     %% new_separated
     % initialize list of RMS's for each cloud
     RMS_of_clouds = [];
+    times = [];
     
     % create a progress bar
     progressbar('Merging', 'ICP')
@@ -174,7 +168,8 @@ function [merged_cloud, meanRMS] = separated_merge(selectionType, nr_samples, ma
     Htarget = Htarget(Htarget(:, 3)<1, :);
 
     % Get rotation and translation matrices for point clouds.
-    for i = sample_rate:sample_rate:size(point_clouds, 3)
+    for i = sampling_rate:sampling_rate:10
+        tic;
 
         Hsource = point_clouds(:,:,i);
 
@@ -195,27 +190,32 @@ function [merged_cloud, meanRMS] = separated_merge(selectionType, nr_samples, ma
         
         HsourceRotated = (RCol * Hsource' + tCol)';
         
+        plotCloud([Htarget; HsourceRotated], 'Merge separate', 'test.fig');
+        
         Htarget = HsourceRotated;
         
         % create padding and concatenate
         HsourceRotated(size(HsourceRotated, 1) : 100000, :) = 2;
         rotated_clouds = cat(3, rotated_clouds, HsourceRotated);
         
-        progressbar(i/size(point_clouds, 3))
+        progressbar(i/10)
+        times = [times, toc]
     end
     meanRMS = mean(RMS_of_clouds);
+    mean_time = mean(times);
     
     merged_cloud = [];
     for i = 1:size(rotated_clouds, 3)
         rotated_cloud = rotated_clouds(:,:,i);
         merged_cloud = [merged_cloud; rotated_cloud(rotated_cloud(:, 3)<1,:)];
-    end
+    end    
 end
 
-function [Htarget, meanRMS] = combined_merge(selectionType, nr_samples, maxIterations, diffRMS, point_clouds)
+function [Htarget, meanRMS, mean_time] = combined_merge(selectionType, nr_samples, maxIterations, diffRMS, point_clouds)
 
     % initialize list of RMS's for each cloud
     RMS_of_clouds = [];
+    times = [];
     
     % create a progress bar
     progressbar('Merging', 'ICP')
@@ -224,7 +224,8 @@ function [Htarget, meanRMS] = combined_merge(selectionType, nr_samples, maxItera
     Htarget = Htarget(Htarget(:, 3)<1, :);
 
     % Get rotation and translation matrices for point clouds.
-    for i = 2:10:52
+    for i = 1:10
+        tic;
 
         Hsource = point_clouds(:,:,i);
 
@@ -246,10 +247,11 @@ function [Htarget, meanRMS] = combined_merge(selectionType, nr_samples, maxItera
         HsourceRotated = (RCol * Hsource' + tCol)';
         
         Htarget = [Htarget; HsourceRotated];
-        length = size(Htarget)
         plotCloud(HsourceRotated, 'HsourceRotated', 'testing.fig');
         
-        progressbar(i/52)
+        progressbar(i/10)
+        times = [times, toc];
     end
     meanRMS = mean(RMS_of_clouds);
+    mean_time = mean(times);
 end
