@@ -21,8 +21,8 @@ Asource = load([datapath, 'source.mat']);
 Atarget = load([datapath, 'target.mat']);
 
 % set ICP parameters
-selectionType_list = [1, 2, 3, 4];
-nr_samples_list = [20, 100, 300, 1000];
+selectionType_list = [2, 3];%[1, 2, 3, 4];
+nr_samples_list = [10,15]; %[20, 100, 300, 1000];
 
 % What selection type corresponds to what
 % 1 = use all the points (a)
@@ -82,8 +82,10 @@ for selectionType_index = 1:length(selectionType_list)
         listAvgRMS = [listAvgRMS, avgRMS];
         % save in .txt file
         fileID = fopen('ICP_testing.txt','a');
-        my_string = ['avgRMS = ', num2str(avgRMS), ', ', 'stdRMS = ', num2str(stdRMS), ', ', 'avgSteps = ', num2str(avgSteps), ', ', 'start_time = ', num2str(start_time), ', ', 'end_time = ', num2str(end_time)];
-        fprintf(fileID,'%10s \n', my_string);
+        value_labels = ['For the run with selection type = ', num2str(selectionType), ' , nr_samples = ', num2str(nr_samples)];
+        result_values = ['avgRMS = ', num2str(avgRMS), ', ', 'stdRMS = ', num2str(stdRMS), ', ', 'avgSteps = ', num2str(avgSteps), ', ', 'start_time = ', num2str(start_time), ', ', 'end_time = ', num2str(end_time)];
+        results = [value_labels, newline, result_values, newline];
+        fprintf(fileID,'%10s \n', results);
         fclose(fileID);
 
         % sample number doesn't affect selectionType one, so break this
@@ -112,5 +114,5 @@ for selectionType_index = 1:length(selectionType_list)
      xlabel('step')
      ylabel('RMS')  
 
-   break;
+   %break;
 end
