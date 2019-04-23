@@ -18,6 +18,8 @@ maxIterations = 100;
 diffRMS = 0.0005;       % convergence if small improvement in RMS
 sampling_rate = 1;
 
+RMS_of_clouds = [];
+
 % load point clouds and create a selection
 point_clouds = load_point_clouds();
 selection = create_selection(sampling_rate);
@@ -47,6 +49,8 @@ for i = 1:size(selection, 2)
     
     [RMS, message, R, t] = ICP(Hsource3, Htarget3, selectionType, ...
                             nr_samples, maxIterations, diffRMS);
+                        
+    RMS_of_clouds = [RMS_of_clouds, RMS];
     
     Rm = cat(3, Rm, R);
     tm = cat(2, tm, t); 
