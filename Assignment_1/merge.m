@@ -8,13 +8,13 @@ close all
 %   frame 
 
 % Set parameters for ICP
-selectionType = 2;      % 1 = use all the points (a)
+selectionType = 3;      % 1 = use all the points (a)
                         % 2 = sample subset of points (b)
                         % 3 = sample subset of points every iteration (c)
                         % 4 = sample from points of interest (d)
                         
 nr_samples = 5000;        % only used for selectionType = 2 or 3
-maxIterations = 200;
+maxIterations = 100;
 diffRMS = 0.0005;       % convergence if small improvement in RMS
 sampling_rate = 1;
 
@@ -26,6 +26,9 @@ selection = create_selection(sampling_rate);
 % initialize lists with rotation and translation matrices
 Rm = [];
 tm = [];
+
+% create a progress bar
+progressbar('Merging', 'ICP')
 
 % Get rotation and translation matrices for point clouds.
 for i = 1:size(selection, 2)
@@ -46,7 +49,9 @@ for i = 1:size(selection, 2)
                             nr_samples, maxIterations, diffRMS);
     
     Rm = cat(3, Rm, R);
-    tm = cat(2, tm, t);   
+    tm = cat(2, tm, t); 
+    
+    progressbar(i/size(selection, 2))
 end
 
 %%

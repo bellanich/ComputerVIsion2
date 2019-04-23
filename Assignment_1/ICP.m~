@@ -40,6 +40,7 @@ function [RMS, message, R, t, listRMS, ii] = ...
         end
     end
     
+    progressbar('ICP')
     while (ii < maxIterations || (oldRMS-RMS > diffRMS && RMS > oldRMS))
         ii = ii + 1;
         if selectionType == 3   % new sample points for each iteration
@@ -57,7 +58,7 @@ function [RMS, message, R, t, listRMS, ii] = ...
         listRMS = [listRMS, RMS]; 
         % New R and t
         [R, t] = detRotation(sourceSample, targetPsi);
-        progressbar([], ii/maxIterations)
+        progressbar(ii/maxIterations)
     end
     if ii == maxIterations
         message = 'maxIterations reached';
