@@ -13,7 +13,7 @@ selectionType = 3;      % 1 = use all the points (a)
                         % 3 = sample subset of points every iteration (c)
                         % 4 = sample from points of interest (d)
                         
-nr_samples = 5;        % only used for selectionType = 2 or 3
+nr_samples = 5000;        % only used for selectionType = 2 or 3
 maxIterations = 100;
 diffRMS = 0.0005;       % convergence if small improvement in RMS
 sampling_rate = 1;
@@ -30,7 +30,7 @@ Rm = [];
 tm = [];
 
 % create a progress bar
-progressbar('Computing rotations', 'ICP')
+progressbar('Merging', 'ICP')
 
 % Get rotation and translation matrices for point clouds.
 for i = 1:size(selection, 2)
@@ -58,14 +58,11 @@ for i = 1:size(selection, 2)
     progressbar(i/size(selection, 2))
 end
 
-meanRMS = mean(RMS_of_clouds)
-
 %%
 first_cloud = point_clouds(:,:,1);
 merged_cloud = first_cloud(first_cloud(:, 3) < 1, :);
 plotCloud(merged_cloud, '1st cloud')
 %%
-progressbar('Merging')
 for j = 1:size(selection, 2)
     
     %  R is 3x3 and t is 3x1. A column and row added for being able to rotate
@@ -88,10 +85,9 @@ for j = 1:size(selection, 2)
         rotated_cloud = cat(1, rotated_cloud, (RCol * next_point + tCol)');
     end
     merged_cloud = [merged_cloud; rotated_cloud]; 
-    progressbar(j/size(selection, 2))
 end
-
 plotCloud(merged_cloud, 'Merged')
+meanRMS = mean(RMS_of_clouds)
 %%
 % ================
 % Helper functions
@@ -131,6 +127,5 @@ function plotCloud (pointCloud, figure_title)
     C = pointCloud(:, 4);
     fscatter3(X, Y, Z, C);
     title = figure_title;
-    savefig('Plots/testfig.fig');
 end
 
