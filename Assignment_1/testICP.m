@@ -21,8 +21,8 @@ Asource = load([datapath, 'source.mat']);
 Atarget = load([datapath, 'target.mat']);
 
 % set ICP parameters
-selectionType_list = [1, 2, 3, 4];
-nr_samples_list = [20, 100, 300, 1000];
+selectionType_list = [2];%[1, 2, 3, 4];
+nr_samples_list = [10, 15]; %[20, 100, 300, 1000];
 
 % What selection type corresponds to what
 % 1 = use all the points (a)
@@ -99,20 +99,24 @@ for selectionType_index = 1:length(selectionType_list)
      % ------------ Plotting results for each selection Type --------------------
      
      % average RMS as a function of nr_samples taken
-     figure;
+     figure1 = figure;
      plot(nr_samples_list, listAvgRMS);
-     title(['Elbow' , ', selectionType = ', num2str(selectionType)])
+     my_title1 = ['Elbow' , ', selectionType = ', num2str(selectionType)];
+     title(my_title1)
      xlabel('sample size')
      ylabel('RMS')
      axis([0 1100 0.15 0.23])
+     saveas(figure1,[my_title1, '.png'])
      
      % Plotting the RMS as a function of iterations completed
      % only consider last nr_samples value
-     figure
+     figure2 = figure;
      plot(listRMS, '-o')
-     title(['RMS per iteration', ', selectionType = ', num2str(selectionType) ])
+     my_title2 = ['RMS per iteration', ', selectionType = ', num2str(selectionType) ];
+     title(my_title2)
      xlabel('step')
      ylabel('RMS')  
+     saveas(figure2,[my_title2, '.png'])
 
    %break;
 end
