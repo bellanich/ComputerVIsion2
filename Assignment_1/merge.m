@@ -8,13 +8,13 @@ close all
 %   frame 
 
 % Set parameters for ICP
-selectionType = 3;      % 1 = use all the points (a)
+selectionType = 2;      % 1 = use all the points (a)
                         % 2 = sample subset of points (b)
                         % 3 = sample subset of points every iteration (c)
                         % 4 = sample from points of interest (d)
                         
-nr_samples = 500;        % only used for selectionType = 2 or 3
-maxIterations = 100;
+nr_samples = 5000;        % only used for selectionType = 2 or 3
+maxIterations = 200;
 diffRMS = 0.0005;       % convergence if small improvement in RMS
 sampling_rate = 1;
 

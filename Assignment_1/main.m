@@ -33,8 +33,8 @@ selectionType = 3;      % 1 = use all the points (a)
                         % 4 = sample from points of interest (d)
                         % 4 is NOT implemented yet
                         
-nr_samples = 500;        % only used for selectionType = 2 or 3
-maxIterations = 100;
+nr_samples = 5000;        % only used for selectionType = 2 or 3
+maxIterations = 200;
 diffRMS = 0.0005;       % convergence if small improvement in RMS
 
 [RMS, message, R, t] = ICP(Hsource3, Htarget3, selectionType, nr_samples, maxIterations, diffRMS);

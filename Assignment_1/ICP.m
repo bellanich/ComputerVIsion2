@@ -40,7 +40,7 @@ function [RMS, message, R, t, listRMS, ii] = ...
         end
     end
         
-    while (ii < maxIterations & (oldRMS-RMS > diffRMS | RMS > oldRMS))
+    while (ii < maxIterations || (oldRMS-RMS > diffRMS && RMS > oldRMS))
         ii = ii + 1;
         if selectionType == 3   % new sample points for each iteration
             sampleInd = selectRandom(source, nr_samples);
