@@ -21,8 +21,8 @@ Asource = load([datapath, 'source.mat']);
 Atarget = load([datapath, 'target.mat']);
 
 % set ICP parameters
-selectionType_list = [2];%[1, 2, 3, 4];
-nr_samples_list = [10, 15]; %[20, 100, 300, 1000];
+selectionType_list = [1, 2, 3, 4];
+nr_samples_list = [20, 100, 300, 1000];
 
 % What selection type corresponds to what
 % 1 = use all the points (a)
