@@ -1,4 +1,9 @@
+Plots/
 Data/
 startup.m
 scratch.m
 *.fig
+*.png
+*.pdf
+*.zip
+

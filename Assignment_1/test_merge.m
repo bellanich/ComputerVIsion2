@@ -1,7 +1,7 @@
 % Testing ICP on accuracy, stability hyperparameters etc.
-%% Initialize file to store data
-% Only run if you want to overwrite previously existing file
-fileID = fopen('merge_testing.txt','w');
+% %% Initialize file to store data
+% % Only run if you want to overwrite previously existing file
+% fileID = fopen('merge_testing.txt','w');
 
 %% Run ICP for particular selectionType, and particular nr_samples
 
@@ -9,7 +9,7 @@ clear all
 clc
 close all
 
-sampling_rates = [1, 2, 4, 10, 1];
+sampling_rates = [10];
 
 
 for i = 1:5

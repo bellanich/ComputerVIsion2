@@ -46,11 +46,11 @@
 % R = load('R.mat')
 % t = load('t.mat')
 % 
-% target = readPcd([datapath, '0000000000.pcd']);
+% target =" readPcd([datapath, '0000000000.pcd']);
 % source = readPcd([datapath, '0000000001.pcd']);
 % size(source)
 % size(R)
 % sourceRot = [R*source'+t]'
 
-tic
-x = toc
+openfig("Plots/Merged_mRMS");
+

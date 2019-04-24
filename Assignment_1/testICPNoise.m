@@ -26,19 +26,21 @@ selectionType = 1;     % 1 = use all the points (a)
                         
 nr_samples = 200;        % only used for selectionType = 2, 3 and 4
 maxIterations = 300;    % max if no convergence
-diffRMS = 0.0002;       % convergence if small improvement in RMS
+diffRMS = 0.0005;       % convergence if small improvement in RMS
 
-listPercNoise = [0.0 0.01 0.02 0.05 0.1]
-listAvgRMSNoise = []
+listPercNoise = [0.0 0.01 0.02 0.05 0.1];
+listAvgRMSNoise = [];
+progressbar('percNoise', 'ICP', 'Tests')
+iter = 0;
 for percNoise = listPercNoise
 
-    nrNoise = round(size(Asource.source', 1) * percNoise)
+    nrNoise = round(size(Asource.source', 1) * percNoise);
     NoisedSource = addNoise(Asource.source', nrNoise);
 
     listAvgRMS = [];
 
 
-        nrTests = 20;
+        nrTests = 10;
         reportSteps = [];
         reportRMS = [];
         for ii = 1:nrTests
@@ -52,16 +54,20 @@ for percNoise = listPercNoise
             % message
             reportSteps = [reportSteps, nrIterations];
             reportRMS = [reportRMS, RMS];
+            
+            progressbar([], [], ii/nrTests)
 
         end    
     
-        nr_samples
-        avgRMS = mean(reportRMS)
-        stdRMS = std(reportRMS)
-        avgSteps = mean(reportSteps)
+        avgRMS = mean(reportRMS);
+        stdRMS = std(reportRMS);
+        avgSteps = mean(reportSteps);
         listAvgRMS = [listAvgRMS, avgRMS];
 
-    listAvgRMSNoise = [listAvgRMSNoise, avgRMS]
+    listAvgRMSNoise = [listAvgRMSNoise, avgRMS];
+    
+    iter = iter + 1;
+    progressbar(iter / 5)
    
 end
 

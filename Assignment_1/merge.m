@@ -6,12 +6,12 @@ function [merged_cloud, meanRMS, mean_time] = merge(method, sampling_rate)
     %   frame 
 
     % Set parameters for ICP
-    selectionType = 3;      % 1 = use all the points (a)
+    selectionType = 1;      % 1 = use all the points (a)
                             % 2 = sample subset of points (b)
                             % 3 = sample subset of points every iteration (c)
                             % 4 = sample from points of interest (d)
 
-    nr_samples = 500;        % only used for selectionType = 2 or 3
+    nr_samples = 5000;        % only used for selectionType = 2 or 3
     maxIterations = 500;
     diffRMS = 0.0005;       % convergence if small improvement in RMS
 
@@ -35,7 +35,7 @@ function [merged_cloud, meanRMS, mean_time] = merge(method, sampling_rate)
                         nr_samples, maxIterations, diffRMS, point_clouds);
                     
             % plot merged clouds
-            figure_name = ['Merged_mRMS', meanRMS, '.fig'];
+            figure_name = ['Merged_mRMS', num2str(meanRMS), '.fig'];
             plotCloud(merged_cloud, 'Merged', figure_name);     
             
         otherwise
@@ -168,7 +168,7 @@ function [merged_cloud, meanRMS, mean_time] = separated_merge(selectionType, nr_
     Htarget = Htarget(Htarget(:, 3)<1, :);
 
     % Get rotation and translation matrices for point clouds.
-    for i = sampling_rate:sampling_rate:10
+    for i = sampling_rate:sampling_rate:99
         tic;
 
         Hsource = point_clouds(:,:,i);
@@ -198,8 +198,8 @@ function [merged_cloud, meanRMS, mean_time] = separated_merge(selectionType, nr_
         HsourceRotated(size(HsourceRotated, 1) : 100000, :) = 2;
         rotated_clouds = cat(3, rotated_clouds, HsourceRotated);
         
-        progressbar(i/10)
-        times = [times, toc]
+        progressbar(i/99)
+        times = [times, toc];
     end
     meanRMS = mean(RMS_of_clouds);
     mean_time = mean(times);
