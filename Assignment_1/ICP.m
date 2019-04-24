@@ -19,7 +19,7 @@ function [RMS, message, R, t, listRMS, ii] = ...
         sourceSample = source(sampleInd, :);
     elseif selectionType == 4  % points from densest clusters
         %  ------ Parameters to change ----------
-        K = 25; %= nr_samples;
+        K = nr_samples;
         nDensestClusters = 3; % sample from n densest cluster
     
         %  ----- Redefining source as only the points from the densest clusters ------
