@@ -1,25 +1,31 @@
 function [fmatch1, fmatch2] = keypoint_matching(...
-    im1, im2, ...
+    image_1, image_2, visualize, ...
     threshPeak, threshEdge, threshMatch)
 %KEYPOINT_MATCHING Finds matching features between input images using SIFT
 % IN
 %  im1 : first input image
 %  im2 : second input image
+%  visualize: true/false to see detected feature matches
 %  threshPeak : SIFT peak threshold
 %  threshEdge : SIFT edge threshold
 %  threshMatch : descriptor matching threshold
 % OUT
 %  fmatch1 : features from first image
 %  fmatch2 : features from second image
+%
+
+% Saving original images so we can plot them at the very end
+im1 = image_1;
+im2 = image_2;
 
 % Assigning variable values to unspecified vars
-if nargin < 3
+if nargin < 4
     threshPeak = 0;
 end
-if nargin < 4
+if nargin < 5
     threshEdge = 10;
 end
-if nargin < 5
+if nargin < 6
     threshMatch = 1.5;
 end
 
@@ -41,7 +47,13 @@ im2 = im2gray255(im2);
 fmatch1 = f1(:, matches(1, :));
 fmatch2 = f2(:, matches(2, :));
 
+% Visualize the matching features
+    if visualize == true
+        figure();
+        plotMatchingFeatures(image_1, image_2, f1, f2, 10, true);
+    end
 end
+
 
 
 function imOut = im2gray255(im)
