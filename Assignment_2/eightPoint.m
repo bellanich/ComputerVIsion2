@@ -25,7 +25,7 @@ end
 function phat = normalize(points)
     noPoints = size(points, 2);
     % normalise
-    m = mean(points, 2)
+    m = mean(points, 2);
     d = 0;
     for ii = 1:noPoints
         d = d + norm(points - m);
@@ -61,7 +61,7 @@ function F = fundamentalMatrix(pointsO, pointsM)
     [U, D, V] = svd(A);
     % step 3 - take column with smallest singular value
     % this is normaly column 9, but if number of points < 9, take that. 
-    minCol = min(9, noPoints)
+    minCol = min(9, noPoints);
     D;
     sizeV = size(V);
     Fentries = V(:, minCol);       % TODO - make sure V and not V'
