@@ -6,16 +6,12 @@ if nargin == 2
 end
 
 if normalise
+    % normalise
     phatO = normalizeFund(pointsO);
-    mean(phatO, 2)   % should be 0
-    mean(norm(phatO))
-    wortel2 = sqrt(2)
     phatM = normalizeFund(pointsM);
-    mean(phatM, 2)   % should be 0
-    mean(norm(phatM))
-    wortel2 = sqrt(2)
     F = fundamentalMatrix(phatO, phatM);
 else
+    dis
     F = fundamentalMatrix(pointsO, pointsM);
 end
 end
@@ -26,17 +22,17 @@ end
 % ===============================================================
 
 function phat = normalizeFund(points)
-    noPoints = size(points, 2)
+    noPoints = size(points, 2);
     % normalise
     m = mean(points, 2);
     d = 0;
     for ii = 1:noPoints
         d = d + norm(points - m);
     end
-    d = d / noPoints
+    d = d / noPoints;
     T = [sqrt(2)/d 0 -m(1)*sqrt(2)/d; ...
         0 sqrt(2)/d -m(2)*sqrt(2)/d; ...
-        0 0 1]
+        0 0 1];
     phat = T * points;
 end
 

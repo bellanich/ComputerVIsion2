@@ -20,7 +20,7 @@ if nargin < 5
 end
 
 [ndims, ncoords, ~] = size(coords1);
-p = 8
+p = 8;
 
 
 % bestF = eye(ndims + 1);
@@ -37,26 +37,24 @@ bestScore = -1;
 for ii = 1:n
     
     % create selection
-    % perm = randperm(ncoords);
-    % sel(1:p) = perm(1:p) * 2;
-    % sel(p+1:end) = sel(1:p) - 1;
-    sel = randperm(ncoords, p)
+    sel = randperm(ncoords, p);
     
     % solve for selection
-    Fcur = eightPoint(coords1(:, sel), coords2(:, sel), true)  % 8 points
+    Fcur = eightPoint(coords1(:, sel), coords2(:, sel), false);  % 8 points
     
-    % score the current M matrix and t vector
+    % score the current Fundamental Matrix Fcur 
     coordsDist = distanceSampson(Fcur, coords1, coords2);   % all points
-    score = sum(coordsDist < threshold)
+    score = sum(coordsDist < threshold);
     
     % update transformation matrix if a better one is found
     if score > bestScore || bestScore < 0
         bestF = Fcur;
         bestScore = score;
     end
-    %}
 end
-
+threshold
+bestScore
+ncoords
 end
 
 % ===================================================================
