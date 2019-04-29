@@ -11,12 +11,12 @@ datapath = './Data/';
 %}
 
 % PoineViewMatrix.txt has 2X101 lines (views) with each 215 3D points
-fileID = fopen('PointViewMatrix.txt')
+fileID = fopen('PointViewMatrix.txt');
 tmp = textscan(fileID, '%f');
 fclose(fileID);
 
 % create P 2M x N array
-% pointview: 2M X N, M: 101 views, N: 215 3D points
+% pointview: 2M X N, M: 101 viewdoc s, N: 215 3D points
 P = zeros(202, 215);
 for ii = 1:202
     for jj = 1:215
@@ -26,4 +26,9 @@ for ii = 1:202
     end
 end
 
-size(P)
+sizeP = size(P)
+
+[M, S] = motionStructure(P);
+
+sizeM = size(M)
+sizeS = size(S)
