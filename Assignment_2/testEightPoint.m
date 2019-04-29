@@ -48,6 +48,8 @@ pointsM = fb(1:2, m2);
 % testing (1) F with eight - point algorithm
 F1 = eightPoint(pointsO, pointsM)           % normalisation = false default
 
+%{
+% this piece still to program
 % testing (2) F normalized eight point algorithm
 F2 = eightPoint(pointsO, pointsM, true)       % normalisation = true
 
@@ -67,6 +69,8 @@ pointEpiO = cat(1, pointsO(:, nrPoint), 1);
 pointEpiM = cat(1, pointsM(:, nrPoint), 1);
 
 epiPolar(Ia, Ib, pointEpiO, pointEpiM, F3)
+%}
+
 
 % =========================================
 % calculate epipolar and make visible
