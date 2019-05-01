@@ -70,7 +70,7 @@ function ds = distanceSampson (F, pointsO, pointsM)
         pM = pointsM(:, ii);
         da = (pM'*F*pO)^2;   % should be scalar
         FpO = F*pO;
-        FpM = F*pM;
+        FpM = F'*pM;
         db = FpO(1)^2 + FpO(2)^2 + FpM(1)^2 + FpM(2)^2; % should be scalar
         ds = [ds da/db];      % added to the list
     end
