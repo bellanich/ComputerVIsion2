@@ -45,11 +45,13 @@ m2 = matches(2, :);
 pointsO = fa(1:2, m1);
 pointsM = fb(1:2, m2);
     
+% make points homogenous
+pointsO = cat(1, pointsO, ones(1, size(pointsO, 2)));
+pointsM = cat(1, pointsM, ones(1, size(pointsM, 2)));
+
 % testing (1) F with eight - point algorithm
 F1 = eightPoint(pointsO, pointsM)           % normalisation = false default
 
-%{
-% this piece still to program
 % testing (2) F normalized eight point algorithm
 F2 = eightPoint(pointsO, pointsM, true)       % normalisation = true
 
@@ -58,19 +60,19 @@ F2 = eightPoint(pointsO, pointsM, true)       % normalisation = true
 % Matrix
 n = 500;
 p = 8;
-thresh = 0.1;
+thresh = 0.5;
 F3 = fundRANSAC(pointsO, pointsM, n, p, thresh)        % default n, p, threshold
 
+%{
 % epipolar - NOT YET READY
 % take point - any point OR matching point ? -
 % make it homogeneous
-nrPoint = 15
+nrPoint = 25
 pointEpiO = cat(1, pointsO(:, nrPoint), 1);
 pointEpiM = cat(1, pointsM(:, nrPoint), 1);
 
-epiPolar(Ia, Ib, pointEpiO, pointEpiM, F3)
+epiPolar(Ia, Ib, pointEpiO, pointEpiM, F1)
 %}
-
 
 % =========================================
 % calculate epipolar and make visible
