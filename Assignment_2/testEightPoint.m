@@ -60,7 +60,7 @@ F2 = eightPoint(pointsO, pointsM, true)       % normalisation = true
 % Matrix
 n = 500;
 p = 8;
-thresh = 0.3;
+thresh = 0.5;
 F3 = fundRANSAC(pointsO, pointsM, n, p, thresh)        % default n, p, threshold
 
 %{

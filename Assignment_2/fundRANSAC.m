@@ -40,7 +40,7 @@ for ii = 1:n
     sel = randperm(ncoords, p);
     
     % solve for selection
-    Fcur = eightPoint(coords1(:, sel), coords2(:, sel), false);  % 8 points
+    Fcur = eightPoint(coords1(:, sel), coords2(:, sel), true);  % 8 points
     
     % score the current Fundamental Matrix Fcur 
     coordsDist = distanceSampson(Fcur, coords1, coords2);   % all points
