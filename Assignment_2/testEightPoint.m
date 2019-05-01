@@ -1,6 +1,6 @@
 % this has to run if to use vl toolbox
 % first download toolbox
-run /home/peterheemskerk/vlfeat-0.9.21/toolbox/vl_setup;
+% run /home/peterheemskerk/vlfeat-0.9.21/toolbox/vl_setup;
 % SK: Solved by adding VLFEATROOT to the gitfolder
 % run vl_setup;
 

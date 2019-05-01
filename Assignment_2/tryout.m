@@ -11,7 +11,7 @@ datapath = './Data/';
 %}
 
 % PoineViewMatrix.txt has 2X101 lines (views) with each 215 3D points
-fileID = fopen('PointViewMatrix.txt')
+fileID = fopen('PointViewMatrix.txt');
 tmp = textscan(fileID, '%f');
 fclose(fileID);
 
