@@ -1,4 +1,4 @@
-%% Performing RANSAC on pair of images
+%% RANSAC test on a pair of images
 clear
 clc
 close all
@@ -14,26 +14,48 @@ visualize = true;
 tform = RANSAC(f1(1:2, :), f2(1:2, :));
 
 
+%% Testing eightPoint.m
+clear
+clc
+close all
 
-%% 
+%datapath = './Data/House/';
+image1 = imread('Data/House/frame00000001.png');
+image2 = imread('Data/House/frame00000041.png');
+Ia = im2single(image1);
+Ib = im2single(image2);
 
-load stereoPointPairs
-[fLMedS,inliers] = estimateFundamentalMatrix(matchedPoints1,...
-    matchedPoints2,'NumTrials',4000);
+% disp('serious')
+thresh = 5;
+[matches, fa, fb] = keypoint_matching(Ia, Ib, thresh);
+nr_matches = size(matches,2);
+m1 = matches(1, :);
+m2 = matches(2, :);
+pointsO = fa(1:2, m1);
+pointsM = fb(1:2, m2);
 
-I1 = imread('viprectification_deskLeft.png');
+F1 = eightPoint(pointsO, pointsM);
+
+% plots points for image 1
 figure; 
 subplot(121);
-imshow(I1); 
-title('Inliers and Epipolar Lines in First Image'); hold on;
-plot(matchedPoints1(inliers,1),matchedPoints1(inliers,2),'go')
+imshow(image1); hold on;
+title('Inliers and Epipolar Lines in First Image');
+plot(pointsO(1,:), pointsO(2,:), 'go')
 
-epiLines = epipolarLine(fLMedS',matchedPoints2(inliers,:));
-points = lineToBorderPoints(epiLines,size(I1));
+% showing epipolar lines of image 1
+epiLines = epipolarLine(F1, pointsM');
+points = lineToBorderPoints(epiLines,size(image1));
 line(points(:,[1,3])',points(:,[2,4])');
 
-I2 = imread('viprectification_deskRight.png');
+% plots points for image 2
 subplot(122); 
-imshow(I2);
+imshow(image2);
 title('Inliers and Epipolar Lines in Second Image'); hold on;
-plot(matchedPoints2(inliers,1),matchedPoints2(inliers,2),'go')
+plot(pointsM(1,:), pointsM(2,:),'go')
+
+% showing epipolar lines on image2
+epiLines = epipolarLine(F1,pointsO');
+points = lineToBorderPoints(epiLines,size(image2));
+line(points(:,[1,3])',points(:,[2,4])');
+truesize;
