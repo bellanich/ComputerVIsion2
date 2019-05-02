@@ -73,6 +73,8 @@ directory = pwd + "/Data/House/";
 end
 
 function PVM = remove_padding(PVM)
+    
+
 end
 
 function index = find_index(array1, coords)
