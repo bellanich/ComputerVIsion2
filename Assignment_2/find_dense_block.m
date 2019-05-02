@@ -1,25 +1,41 @@
-function  dense_blocks = find_dense_block(point_view_file, consec_images_num)
+function  dense_blocks = find_dense_block(point_view_matrix, consec_images_num)
 
-    [row_num, col_num] = size(point_view_file);
-    
+    %{
+        ============= Sliding dense block  window search =================
+        :params:
+        point_view_matrix (PVM): matrix built from chaining.m
+        consec_images_num: number of consecutive images to search for dense
+        blocks in
+
+        :returns:
+        dense_blocks: list of all created dense blocks from PVM
+    %}
+
+    % calculate needed parameters 
+    [row_num, col_num] = size(point_view_matrix);
     search_width = consec_images_num*2;
+    search_times = floor((row_num - search_width)/2);
 
-    % list of dense matrices found during sliding wind search
-    dense_blocks = cell(row_num - search_width, 1);
+    % initialize list to save dense matrices found during search
+    cell_length = ceil(search_times/2);
+    dense_blocks = cell(cell_length, 1);
 
-    % For every sliding window, find and save dense block
-    for i = 0: (row_num - search_width)
-        data_window = point_view_file(1 + i : search_width + i, :);
+    % For every sliding window, build and save a dense block
+    for i = 0: 2: search_times
+        
+        data_window = point_view_matrix(1 + i : search_width + i, :);
 
         % use all nonzero columns to make condensed block
         dense_cols = find(all(data_window ~= -1)); 
         condense_wind = data_window(:, dense_cols);
 
         % save condensed block in list 
-        dense_blocks{i+1} = condense_wind;
+        block_ind = (i/2) + 1;
+        dense_blocks{block_ind} = condense_wind;
+        
     end
     
-    % ----- Uncomment to find retrieve the densest block ----
+    % ---- Uncomment to find retrieve the biggest densest block ----
     % densest_block = max_search(dense_blocks);
 end
 
