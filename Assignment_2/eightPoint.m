@@ -6,13 +6,10 @@ if nargin == 2
 end
 
 if normalise
-    disp ('normalise')
-    % normalise
-    phatO = normalize(pointsO);
-    phatM = normalize(pointsM);
+    phatO = normalizeFund(pointsO);
+    phatM = normalizeFund(pointsM);
     F = fundamentalMatrix(phatO, phatM);
 else
-    disp ('no normalisation')
     F = fundamentalMatrix(pointsO, pointsM);
 end
 end
@@ -22,19 +19,31 @@ end
 %   helper functions
 % ===============================================================
 
-function phat = normalize(points)
+function phat = normalizeFund(points)
     noPoints = size(points, 2);
     % normalise
-    m = mean(points, 2)
+    m = mean(points, 2);
     d = 0;
     for ii = 1:noPoints
-        d = d + norm(points - m);
+        d = d + norm(points(:, ii) - m);
     end
     d = d / noPoints;
     T = [sqrt(2)/d 0 -m(1)*sqrt(2)/d; ...
         0 sqrt(2)/d -m(2)*sqrt(2)/d; ...
         0 0 1];
     phat = T * points;
+    % if to test that mean phat = 0 and mean of distances = wortel2
+    %{
+    disp('test resutls')
+    meanphat = mean(phat, 2)      % 0 on x and y, 1 on z. 
+    normphat = [];
+    for ii = 1:noPoints
+        normphat = [normphat, norm(phat(1:2, ii))];
+                                    % only norm of x and y
+    end
+    meannorm = mean(normphat)
+    wortel2 = sqrt(2)
+    %}
 end
 
 function F = fundamentalMatrix(pointsO, pointsM)
@@ -61,11 +70,9 @@ function F = fundamentalMatrix(pointsO, pointsM)
     [U, D, V] = svd(A);
     % step 3 - take column with smallest singular value
     % this is normaly column 9, but if number of points < 9, take that. 
-    minCol = min(9, noPoints)
-    D;
-    sizeV = size(V);
-    Fentries = V(:, minCol);       % TODO - make sure V and not V'
-    Fnonsing = reshape(Fentries, [3,3]);  % TODO - make sure this is always correct
+    minCol = min(9, noPoints);
+    Fentries = V(:, minCol);      % TODO - make sure V and not V'
+    Fnonsing = reshape(Fentries, [3,3]); 
     % step 4 - ensure singularity of F
     [Uf, Df, Vf] = svd(Fnonsing);
     Df(3, 3) = 0;

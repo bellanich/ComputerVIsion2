@@ -55,15 +55,13 @@ F1 = eightPoint(pointsO, pointsM)           % normalisation = false default
 % testing (2) F normalized eight point algorithm
 F2 = eightPoint(pointsO, pointsM, true)       % normalisation = true
 
-%{
 % testing (3) RANSAC for determining Fundamental Matrix using eightPoint
 % needs to be tuned, not very stable sofar in the returned Fundametal
 % Matrix
 n = 500;
 p = 8;
-thresh = 0.1;
+thresh = 0.5;
 F3 = fundRANSAC(pointsO, pointsM, n, p, thresh)        % default n, p, threshold
-%}
 
 %{
 % epipolar - NOT YET READY
