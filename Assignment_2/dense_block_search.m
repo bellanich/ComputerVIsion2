@@ -3,7 +3,7 @@ clc
 close all
 
 %  === Generate random toy point-view matrix for testing purposes ======
-W = 4;
+W = 15;
 L = 15;
 test_matrix = randi([-30,100],W,L);
 test_matrix(find(test_matrix < 0)) = -1;
@@ -13,11 +13,20 @@ test_matrix
 % ============== Parameters to pass to function ===================
 % number of consec images
 consec_images_num = 2;
-densest_block = find_dense_block(test_matrix, consec_images_num);
+densest_blocks = find_dense_block(test_matrix, consec_images_num);
+
+% to loop through dense blocks
+num_densest_blocks = length(cellfun('size', densest_blocks, 2));
+
+% currently, print out each dense block saved in the list
+for block = 1:num_densest_blocks
+    % gives you a single 
+    densest_blocks{block}
+end
 
 
 % ============= Sliding dense block  window search =================
-function  densest_block = find_dense_block(point_view_file, consec_images_num)
+function  dense_blocks = find_dense_block(point_view_file, consec_images_num)
 
     [row_num, col_num] = size(point_view_file);
     
@@ -31,16 +40,18 @@ function  densest_block = find_dense_block(point_view_file, consec_images_num)
         data_window = point_view_file(1 + i : search_width + i, :);
 
         % use all nonzero columns to make condensed block
-        dense_cols = find(all(data_window ~= -1)); %TODO: change to -1!
+        dense_cols = find(all(data_window ~= -1)); 
         condense_wind = data_window(:, dense_cols);
 
         % save condensed block in list 
         dense_blocks{i+1} = condense_wind;
     end
     
-    densest_block = max_search(dense_blocks);
+    % ----- Uncomment to find retrieve the densest block ----
+    % densest_block = max_search(dense_blocks);
 end
 
+% ==== helper function to search for biggest dense block =========
 function max_found = max_search(my_cell)
 
     % get list of sizes of the matrixes stored in cell
