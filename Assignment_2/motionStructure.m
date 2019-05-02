@@ -1,7 +1,7 @@
 function [M, S] = motionStructure(Dsparse, base)
 
 if nargin == 1
-    base = 0
+    base = 0;
 end
 
 % step 0 - sample dense block - assumption that all is dense 
