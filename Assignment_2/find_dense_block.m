@@ -1,31 +1,3 @@
-clear all 
-clc
-close all
-
-%  === Generate random toy point-view matrix for testing purposes ======
-W = 15;
-L = 15;
-test_matrix = randi([-30,100],W,L);
-test_matrix(find(test_matrix < 0)) = -1;
-test_matrix
- 
-%%
-% ============== Parameters to pass to function ===================
-% number of consec images
-consec_images_num = 2;
-densest_blocks = find_dense_block(test_matrix, consec_images_num);
-
-% to loop through dense blocks
-num_densest_blocks = length(cellfun('size', densest_blocks, 2));
-
-% currently, print out each dense block saved in the list
-for block = 1:num_densest_blocks
-    % gives you a single 
-    densest_blocks{block}
-end
-
-
-% ============= Sliding dense block  window search =================
 function  dense_blocks = find_dense_block(point_view_file, consec_images_num)
 
     [row_num, col_num] = size(point_view_file);
