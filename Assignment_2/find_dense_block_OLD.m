@@ -1,4 +1,4 @@
-function  dense_blocks = find_dense_block(point_view_matrix, consec_images_num)
+function  dense_blocks = find_dense_block_OLD(point_view_matrix, consec_images_num)
 
     %{
         ============= Sliding dense block  window search =================

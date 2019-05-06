@@ -1,4 +1,4 @@
-function PVM = chaining()
+function PVM = chainingOLD()
 
     %% load images
     images = load_images();

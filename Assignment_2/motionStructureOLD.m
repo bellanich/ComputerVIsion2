@@ -1,4 +1,4 @@
-function [M, S] = motionStructure(Dsparse, base)
+function [M, S] = motionStructureOLD(Dsparse, base)
 
 if nargin == 1
     base = 0;
