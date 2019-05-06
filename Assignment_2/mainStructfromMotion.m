@@ -2,7 +2,7 @@
 
 % step 1 - initialise
 
-consec_images_num = 3;      % 0, 3 or 4 - 
+consec_images_num = 4;      % 0, 3 or 4 - 
                             % 0 means that it taks the given pointviewmatrix  
                             
 % step 3 - iterate (for each row)
@@ -11,16 +11,22 @@ if consec_images_num == 0
     disp('read given PVM..')
     PVM_given = readPVM();    % helper function
     
+    % plotPVM(PVM_given)            % to give statistics and plot
+    
     [M, S] = motionStructure(PVM_given);  % helper function
     
+    size(S)
     PC = S;
 else
     disp('chaining....')
     PVM = chaining();              % helper function
     
+    % plotPVM(PVM)                    % to give statistics and plotting
+    
     disp('dense blocking...')
     dense_blocks = find_dense_block(PVM, consec_images_num);  % helper function
-    % step 4 - amalgate all created S
+    
+    % amalgate all created S
 
     % to loop through dense blocks
     num_densest_blocks = length(cellfun('size', dense_blocks, 2));
@@ -57,167 +63,65 @@ plot_3D(PC)
 % helper function
 % ========================================================
 
-function [M, S] = motionStructure(Dsparse, base)
-% function delivers M and S matrices 
-
-if nargin == 1
-    base = 0;
-end
-
-% step 0 - sample dense block - assumption that all is dense 
-% look for points which are in 90% (parameter) of projections
-threshold = 0.9;
-D = [];
-[noProjections, noPoints] = size(Dsparse);
-for ii = 1:noPoints
-    points = Dsparse(:, ii);
-    if sum(points(points(1) > 0)) / noProjections > threshold
-        D = cat(2, D, points);
+function plotPVM(PVM, endColumn)
+    if nargin == 1
+        endColumn = size(PVM, 2)
     end
-end
-
-% step: process whole D (if base == 0) or walk through D with steps = base
-[noProjections, noPoints] = size(D);
-if base == 0
-    [M, S] = calcMS(D);
-else
-    step = 2*base;
-    noIterations = floor(noPoints/step);
-    for ii = 1:noIterations
-        Diter = D((ii-1)*step+1:ii*step, :);
-        [Miter, Siter] = calcMS(Diter);
-        if ii == 1
-            Sstart = Siter;
-            S = Sstart;
-            sizeStart = size(S)
-        else
-            [~,Z] = procrustes(Sstart,Siter);
-            S = cat(2, S, Z);
+    % some statistics
+    size(PVM)
+    noPoints = sum(PVM(:)>0);
+    noPVM = prod(size(PVM));
+    percFilledPVM = noPoints/noPVM
+    % plotting one set of rows
+    figure
+    X = PVM(1, :);
+    Y = PVM(2, :);
+    scatter(X, Y)
+    % plotting all chained points
+    count10 = 0;
+    count20 = 0;
+    count30 = 0;
+    count50 = 0;
+    count100 = 0;
+    figure
+    for ii = 1:endColumn
+        % PVM_col = PVM(:, ii);
+        PVM_col = PVM(PVM(:, ii)>0, ii);
+        lenCol = size(PVM_col, 1);
+        if lenCol > 0
+            xIndex = [1:2:lenCol];
+            yIndex = [2:2:lenCol];
+            xPVM = PVM_col(xIndex);
+            yPVM = PVM_col(yIndex);
+            plot(xPVM, yPVM)
+            hold on
+        end
+        if lenCol > 10
+            count10 = count10+1;
+        end
+        if lenCol > 20
+            count20 = count20+1;
+        end
+        if lenCol > 30
+            count30 = count30+1;
+        end
+        if lenCol > 50
+            count50 = count50+1;
+        end
+        if lenCol > 100
+            count100 = count100+1;
         end
     end
-    sizeS = size(S)
-    M = 0
-end
-end
-
-% ===============================================================
-% helper function
-% ===============================================================
-
-function [M, S] = calcMS(D)
-% D is dense D 
-    % step 1 - point normalisation
-    mD = mean(D, 2);
-    sizemD=size(mD);
-    Dnorm = D-mD;
-    % step 2 - SVD - and reduction to rank 3
-    [U, W, V] = svd(Dnorm);
-    U3 = U(:, 1:3);
-    W3 = W(1:3, 1:3);
-    V3 = V(:, 1:3) ;        
-    D3 = U3 * W3 * V3';
-    % step 3 - construct M for Motion and S for Structure
-    M = U3 * W3^(1/2);
-    S = W3^(1/2) * V3';
-end
-
-
-
-function PVM = chaining()
-
-    % load images
-    images = load_images();
-
-
-    % initialize padded PVM
-    PVM = -1 .* ones(2*size(images, 3), 4000);
-    threshold = 4;
-
-    image1 = images(:,:,1);
-    image2 = images(:,:,2);
-
-    [matches, features1, features2] = keypoint_matching( ...
-                                    image1, image2, threshold);
-
-    first_row = remove_doubles([features1(1:2, matches(1, :)); features2(1:2, matches(2, :))]);
-
-    for i = 1:size(first_row, 2)
-        for k = 1:4
-            PVM(k, i) = first_row(k, i);
-        end
-    end
-
-    max_index = i;
-
-    % add rows
-    for i = 2:size(images, 3)-1
-
-        i_current = 2*i;
-        i_next = 2*(i+1);
-
-        [matches, features1, features2] = keypoint_matching( ...
-                                      images(:,:,i), images(:,:,i+1), threshold);
-
-        next_row = remove_doubles([features1(1:2, matches(1, :)); features2(1:2, matches(2, :))]);
-
-        buffer = [];
-
-        for j = 1:size(next_row, 2)
-
-            index = find_index(PVM(i_current-1:i_current, :), next_row(1:2, j));
-
-            if index < 1
-                buffer = [buffer, next_row(3:4, j)];
-            else
-                PVM(i_next-1:i_next, index) = next_row(3:4, j);
-            end
-        end
-
-        for k = 1:size(buffer, 2)
-            PVM(i_next-1:i_next, max_index+k) = buffer(1:2, k);
-        end
-
-        max_index = max_index + size(buffer, 2);
-    end
-
-    PVM = remove_padding(PVM);
-
+    count10
+    count20
+    count30
+    count50
+    count100
 end
 
 % ########################
 % |   Helper Functions   |
 % ########################
-
-function images = load_images
-images = [];
-directory = pwd + "/Data/House/";
-    for i = 1:49
-        filename = sprintf("frame000000%02d.png", i);
-        current_image = imread(strcat(directory, filename));
-        images = cat(3, images, im2single(current_image));
-    end
-end
-
-function PVM = remove_padding(PVM)
-    indices = any(PVM > -1); 
-    PVM = PVM(:, indices);
-end
-
-function index = find_index(array1, coords)
-    
-    index = 0;
-
-    for i = 1:size(array1, 2)
-        if coords(1) == array1(1, i) && coords(2) == array1(2, i)
-            index = i;
-            break;
-        end
-    end
-end
-
-function row = remove_doubles(array)
-    row = unique(array', 'rows', 'stable')';
-end
 
 function  dense_blocks = find_dense_block(point_view_matrix, consec_images_num)
 

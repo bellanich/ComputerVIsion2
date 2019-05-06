@@ -45,7 +45,7 @@ elseif F_type == 'F3'
     n = 500;
     p = 8;
     thresh = 0.5;
-    F = fundRANSAC(pointsO, pointsM, n, p, thresh); 
+    F = fundRANSAC(pointsO, pointsM, n, p, thresh);
 end
 
 % plots feature-matching points for image 1
@@ -66,6 +66,7 @@ epiLines = epipolarLine(F,(pointsO(1:2, :))');
 points = lineToBorderPoints(epiLines,size(image2));
 line(points(:,[1,3])', points(:,[2,4])');
 %truesize;
+
 end
 % ===============================================================
 %                   Eight points algorithm functions
@@ -78,16 +79,17 @@ if nargin == 2
 end
 
 if normalise
-    phatO = normalizeFund(pointsO);
-    phatM = normalizeFund(pointsM);
-    F = fundamentalMatrix(phatO, phatM);
+    [phatO, TO] = normalizeFund(pointsO);
+    [phatM, TM] = normalizeFund(pointsM);
+    Fnorm = fundamentalMatrix(phatO, phatM);
+    F = TM' * Fnorm * TO;
 else
     F = fundamentalMatrix(pointsO, pointsM);
 end
 end
 
 %   eight-point helper functions
-function phat = normalizeFund(points)
+function [phat, T] = normalizeFund(points)
     noPoints = size(points, 2);
     % normalise
     m = mean(points, 2);
