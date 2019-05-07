@@ -82,8 +82,7 @@ if normalise
     [phatO, TO] = normalizeFund(pointsO);
     [phatM, TM] = normalizeFund(pointsM);
     Fnorm = fundamentalMatrix(phatO, phatM);
-    % F = TM' * Fnorm * TO;
-    F = Fnorm;
+    F = TM' * Fnorm * TO;
 else
     F = fundamentalMatrix(pointsO, pointsM);
 end
