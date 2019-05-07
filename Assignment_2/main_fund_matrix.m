@@ -18,4 +18,4 @@ image2 = 'Data/House/frame00000041.png';
                matrix
 %}
 
-eightPoint_test(image1, image2, 'F3');
+eightPoint_test(image1, image2, 'F1');
