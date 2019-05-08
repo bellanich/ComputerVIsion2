@@ -1,9 +1,12 @@
 import mesh_to_png
 import numpy as np
 from math import sin, cos, pi
+from mesh_to_png import load_faces, mesh_to_png
+from data_def import Mesh
 
 
-def get_viewport_matrix(vl, vr, vt, vb):
+
+def get_viewport_matrix(vr, vl, vt, vb):
     """
     create a viewport matrix that is defined by the coordinates (vl, vt) and (vr, vb)
     :param vl:
@@ -34,7 +37,7 @@ def get_perspective_projection_matrix(r, l, t, b, f, n):
                      [0,             0,                 -1,                0]])
 
 
-def get_rotation_matrix(angles):
+def get_transformation_matrix(angles):
     """
     Create a rotation matrix defined by the rotation angles around the x, y and z axes
     :param angels:
@@ -55,4 +58,32 @@ def get_rotation_matrix(angles):
                    [sin(angles[2]),  cos(angles[2]), 0],
                    [0,                            0, 1]])
 
-    return Rx*Ry*Rz
+    rotation = np.matmul(np.matmul(Rx,Ry),Rz)
+
+    return np.append(np.append(rotation, np.zeros((1, 3)), axis=0), np.array([[0], [0], [0], [1]]), axis=1)
+
+
+if __name__ ==  "__main__":
+
+    alpha = np.random.uniform(-1, 1, 30)
+    delta = np.random.uniform(-1, 1, 20)
+    pCid, pCexp, mean_tex, triangles = load_faces(alpha, delta)
+
+    # Add fourth dimension to points
+    pCexp = np.append(pCexp, np.ones((len(pCexp), 1)), axis=-1)
+
+    # Projection matrix
+    P = get_viewport_matrix(1, -10, 1, -10) * get_perspective_projection_matrix(1, -1, 1, -1, 100, 0.5)
+
+    # Transformation matrix
+    T = get_transformation_matrix(np.array([0,45,0]))
+
+    transformed_points = np.empty((0, 4))
+    for i in range(len(pCexp)):
+        transposed_point = np.expand_dims(pCexp[i], 1)
+        transformed_point = np.matmul(np.matmul(P, T), transposed_point)
+
+        transformed_points = np.append(transformed_points, transformed_point.T, axis=0)
+
+    mesh = Mesh(transformed_points[:,:-1], mean_tex, triangles)
+    mesh_to_png("transformed.png", mesh)
