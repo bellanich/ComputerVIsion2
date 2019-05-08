@@ -52,5 +52,11 @@
 % size(R)
 % sourceRot = [R*source'+t]'
 
-openfig("Plots/Merged_mRMS");
+% openfig("Plots/Merged_mRMS");
+
+
+% points = [1,2,3];
+% F = [[0.5, 0.5, 0.5];[0.5, 0.5, 0.5];[0.5, 0.5, 0.5]];
+% 
+% lines = epipolarLine(F, points)
 

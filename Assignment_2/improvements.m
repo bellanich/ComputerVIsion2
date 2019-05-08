@@ -13,5 +13,8 @@
     reliably. This will translate into a denser point view matrix and a
     better 3D point reconstruction.
 
-4. 
-}%
+%}
+
+test_M = 60 .* rand(8, 3) - 30;
+
+row = M(1,:);

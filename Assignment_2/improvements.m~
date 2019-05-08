@@ -1,6 +1,0 @@
-%{
-1. PVM density improvements:
-    This only works if you can somehow interpolate new points. Just
-    recapturingthe the feature chains doesn't improve the selection of
-    dense blocks. 
-}%
