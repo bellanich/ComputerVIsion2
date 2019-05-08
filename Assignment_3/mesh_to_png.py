@@ -7,11 +7,9 @@ import h5py
 
 from data_def import PCAModel, Mesh
 
-<<<<<<< HEAD
 bfm = h5py.File("model2017-1_face12_nomouth.h5", 'r')
 
 mean_shape = np.asarray(bfm['shape/model/mean'], dtype=np.float32).reshape((-1, 3))
-=======
 # Peter: added .
 bfm = h5py.File("./Data/model2017-1_face12_nomouth.h5", 'r')
 
@@ -42,7 +40,6 @@ print(np.shape(newcombi))
 newm = mean_shape + newcombi
 print(np.shape(newm))
 
->>>>>>> c63972298fdb4de908a54740d166700f862878e9
 mean_tex = np.asarray(bfm['color/model/mean'], dtype=np.float32).reshape((-1, 3))
 
 triangles = np.asarray(bfm['shape/representer/cells'], dtype=np.int32).T
@@ -58,11 +55,6 @@ def mesh_to_png(file_name, mesh):
         f.write(png)
 
 if __name__ == '__main__':
-<<<<<<< HEAD
-    mesh = Mesh(mean_shape, mean_tex, triangles)
-    mesh_to_png("debug.png", mesh)
-=======
     # mesh = Mesh(mean_shape, mean_tex, triangles)
     mesh = Mesh(newm, mean_tex, triangles)
     mesh_to_png("output.png", mesh)
->>>>>>> c63972298fdb4de908a54740d166700f862878e9
