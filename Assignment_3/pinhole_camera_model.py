@@ -63,20 +63,35 @@ def get_transformation_matrix(angles):
     return np.append(np.append(rotation, np.zeros((1, 3)), axis=0), np.array([[0], [0], [0], [1]]), axis=1)
 
 
-if __name__ ==  "__main__":
+def load_txt(filename):
+    """
+    load an .txt file into a list
+    :param filename:
+    :return:
+    """
+    with open(filename, 'r') as f:
+        lines = f.readlines()
 
-    alpha = np.random.uniform(-1, 1, 30)
-    delta = np.random.uniform(-1, 1, 20)
-    pCid, pCexp, mean_tex, triangles = load_faces(alpha, delta)
+    landmarks = np.array([int(line.rstrip()) for line in lines])
+
+    return landmarks
+
+def run_pinhole_camera(rotation_angle, pCexp, mean_tex, use_landmarks=False):
 
     # Add fourth dimension to points
     pCexp = np.append(pCexp, np.ones((len(pCexp), 1)), axis=-1)
+
+    if use_landmarks:
+        landmarks = load_txt('./Data/Landmarks68_model2017-1_face12_nomouth.txt')
+
+        for i in range(len(landmarks)):
+            mean_tex[landmarks[i]] = [0,0,1]
 
     # Projection matrix
     P = get_viewport_matrix(1, -10, 1, -10) * get_perspective_projection_matrix(1, -1, 1, -1, 100, 0.5)
 
     # Transformation matrix
-    T = get_transformation_matrix(np.array([0,45,0]))
+    T = get_transformation_matrix(np.array([0, rotation_angle,0]))
 
     transformed_points = np.empty((0, 4))
     for i in range(len(pCexp)):
@@ -85,5 +100,26 @@ if __name__ ==  "__main__":
 
         transformed_points = np.append(transformed_points, transformed_point.T, axis=0)
 
-    mesh = Mesh(transformed_points[:,:-1], mean_tex, triangles)
-    mesh_to_png("transformed.png", mesh)
+    return transformed_points
+
+
+if __name__ ==  "__main__":
+
+    alpha = np.random.uniform(-1, 1, 30)
+    delta = np.random.uniform(-1, 1, 20)
+    pCid, pCexp, mean_tex, triangles = load_faces(alpha, delta)
+    mesh = Mesh(pCexp, mean_tex, triangles)
+    mesh_to_png('pinhole.png', mesh)
+
+
+    transformed_face = run_pinhole_camera(-10, pCexp, mean_tex)
+    mesh = Mesh(transformed_face[:, :-1], mean_tex, triangles)
+    mesh_to_png('pinhole_-10.png', mesh)
+
+    transformed_face = run_pinhole_camera(10, pCexp, mean_tex)
+    mesh = Mesh(transformed_face[:, :-1], mean_tex, triangles)
+    mesh_to_png('pinhole_10.png', mesh)
+
+    transformed_face = run_pinhole_camera(10, pCexp, mean_tex, use_landmarks=True)
+    mesh = Mesh(transformed_face[:,:-1], mean_tex, triangles)
+    mesh_to_png('pinhole_10_with_landmarks.png', mesh)
