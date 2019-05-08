@@ -7,9 +7,6 @@ import h5py
 
 from data_def import PCAModel, Mesh
 
-bfm = h5py.File("model2017-1_face12_nomouth.h5", 'r')
-
-mean_shape = np.asarray(bfm['shape/model/mean'], dtype=np.float32).reshape((-1, 3))
 # Peter: added .
 bfm = h5py.File("./Data/model2017-1_face12_nomouth.h5", 'r')
 
