@@ -45,6 +45,12 @@
 #   via the command:
 #       pip install numpy
 
+# COMMENT FROM Peter
+# RUN THIS CODE FROM COMMAND WITH:
+# >> python3 face_landmark_detection.py ./Data/shape_predictor_68_face_landmarks.dat .
+# First argument is full path to .dat file, second argument is path to image.
+
+
 import sys
 import os
 import dlib
@@ -68,7 +74,7 @@ detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor(predictor_path)
 win = dlib.image_window()
 
-for f in glob.glob(os.path.join(faces_folder_path, "*.jpg")):
+for f in glob.glob(os.path.join(faces_folder_path, "*.png")):            # specify image
     print("Processing file: {}".format(f))
     img = dlib.load_rgb_image(f)
 
