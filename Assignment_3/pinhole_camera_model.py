@@ -5,7 +5,6 @@ from mesh_to_png import load_faces, mesh_to_png
 from data_def import Mesh
 
 
-
 def get_viewport_matrix(vr, vl, vt, vb):
     """
     create a viewport matrix that is defined by the coordinates (vl, vt) and (vr, vb)
@@ -15,10 +14,10 @@ def get_viewport_matrix(vr, vl, vt, vb):
     :param vb:
     :return:
     """
-    return np.array([[(vr - vl)/2, 0,  0,   0],
-                    [0,  (vt - vb)/2,  0,   0],
-                    [0,            0,  0.5, 0],
-                    [0,            0,  0,   1]])
+    return np.array([[(vr - vl)/2, 0,    0, (vr + vl) / 2],
+                    [0,  (vt - vb)/2,    0, (vt + vb) / 2],
+                    [0,            0,  0.5,           0.5],
+                    [0,            0,    0,             1]])
 
 
 def get_perspective_projection_matrix(r, l, t, b, f, n):
@@ -76,6 +75,7 @@ def load_txt(filename):
 
     return landmarks
 
+
 def run_pinhole_camera(rotation_angle, pCexp, mean_tex, use_landmarks=False):
 
     # Add fourth dimension to points
@@ -110,7 +110,6 @@ if __name__ ==  "__main__":
     pCid, pCexp, mean_tex, triangles = load_faces(alpha, delta)
     mesh = Mesh(pCexp, mean_tex, triangles)
     mesh_to_png('pinhole.png', mesh)
-
 
     transformed_face = run_pinhole_camera(-10, pCexp, mean_tex)
     mesh = Mesh(transformed_face[:, :-1], mean_tex, triangles)

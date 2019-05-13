@@ -2,8 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1c2e59ab-e924-4020-9d5b-0aea8270f750" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Landmarks68_model2017-1_face12_nomouth.anl" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/pinhole_camera_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/pinhole_camera_model.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -14,12 +12,13 @@
   </component>
   <component name="CoverageDataManager">
     <SUITE FILE_PATH="coverage/Assignment_3$mesh_to_png.coverage" NAME="mesh_to_png Coverage Results" MODIFIED="1557313812764" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/Assignment_3$pinhole_camera_model.coverage" NAME="pinhole_camera_model Coverage Results" MODIFIED="1557328698474" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Assignment_3$pinhole_camera_model.coverage" NAME="pinhole_camera_model Coverage Results" MODIFIED="1557329255184" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="FUSProjectUsageTrigger">
     <session id="-877786290">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
+          <entry key="project.closed" value="1" />
           <entry key="project.open.time.0" value="1" />
           <entry key="project.opened" value="1" />
         </counts>
@@ -41,14 +40,14 @@
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="Python Console" value="150" />
-          <entry key="py" value="3684" />
+          <entry key="py" value="3757" />
           <entry key="txt" value="2" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="PLAIN_TEXT" value="2" />
-          <entry key="Python" value="3834" />
+          <entry key="Python" value="3907" />
         </counts>
       </usages-collector>
     </session>
@@ -58,7 +57,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/mesh_to_png.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-527">
+            <state relative-caret-position="-707">
               <caret line="10" column="64" selection-start-line="10" selection-start-column="64" selection-end-line="10" selection-end-column="64" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
@@ -71,12 +70,12 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/pinhole_camera_model.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="418">
-              <caret line="118" column="4" lean-forward="true" selection-start-line="118" selection-start-column="4" selection-end-line="118" selection-end-column="4" />
+            <state relative-caret-position="783">
+              <caret line="124" lean-forward="true" selection-start-line="124" selection-end-line="124" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
-                <marker date="1557328482010" expanded="true" signature="1138:1143" ph="..." />
-                <marker date="1557328482010" expanded="true" signature="2367:3211" ph="..." />
+                <marker date="1557329255173" expanded="true" signature="1185:1190" ph="..." />
+                <marker date="1557329255173" expanded="true" signature="2415:3259" ph="..." />
               </folding>
             </state>
           </provider>
@@ -239,7 +238,6 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="25" width="1920" height="1055" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info id="Favorites" order="0" side_tool="true" />
       <window_info content_ui="combo" id="Project" order="1" weight="0.21664888" />
@@ -252,7 +250,7 @@
       <window_info anchor="bottom" id="Docker" order="5" show_stripe_button="false" />
       <window_info anchor="bottom" id="Message" order="6" />
       <window_info anchor="bottom" id="Find" order="7" />
-      <window_info active="true" anchor="bottom" id="Run" order="8" visible="true" weight="0.32972974" />
+      <window_info anchor="bottom" id="Run" order="8" weight="0.32972974" />
       <window_info anchor="bottom" id="Debug" order="9" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="10" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="11" weight="0.4" />
@@ -333,7 +331,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/mesh_to_png.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-527">
+        <state relative-caret-position="-707">
           <caret line="10" column="64" selection-start-line="10" selection-start-column="64" selection-end-line="10" selection-end-column="64" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
@@ -344,12 +342,12 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/pinhole_camera_model.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="418">
-          <caret line="118" column="4" lean-forward="true" selection-start-line="118" selection-start-column="4" selection-end-line="118" selection-end-column="4" />
+        <state relative-caret-position="783">
+          <caret line="124" lean-forward="true" selection-start-line="124" selection-end-line="124" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
-            <marker date="1557328482010" expanded="true" signature="1138:1143" ph="..." />
-            <marker date="1557328482010" expanded="true" signature="2367:3211" ph="..." />
+            <marker date="1557329255173" expanded="true" signature="1185:1190" ph="..." />
+            <marker date="1557329255173" expanded="true" signature="2415:3259" ph="..." />
           </folding>
         </state>
       </provider>
