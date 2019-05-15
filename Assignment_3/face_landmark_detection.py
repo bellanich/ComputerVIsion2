@@ -55,6 +55,7 @@ import sys
 import os
 import dlib
 import glob
+import numpy as np
 
 # if len(sys.argv) != 3:
 #     print(
@@ -69,6 +70,19 @@ import glob
 #
 # predictor_path = sys.argv[1]
 # faces_folder_path = sys.argv[2]
+
+
+# From canvas
+def shape_to_np(shape, dtype="int"):
+
+    # initialize the list of (x, y)-coordinates
+    coords = np.zeros((68, 2), dtype=dtype)
+    # loop over the 68 facial landmarks and convert them
+    # to a 2-tuple of (x, y)-coordinates
+    for i in range(0, 68):
+        coords[i] = (shape.part(i).x, shape.part(i).y)
+        # return the list of (x, y)-coordinates
+    return coords
 
 
 def face_landmark_detection(predictor_path, faces_folder_path):
@@ -102,7 +116,7 @@ def face_landmark_detection(predictor_path, faces_folder_path):
         win.add_overlay(dets)
         dlib.hit_enter_to_continue()
 
-    return
+    return shape_to_np(shape)
 
 
 if __name__ == "__main__":
