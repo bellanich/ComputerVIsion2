@@ -137,5 +137,5 @@ if __name__ == "__main__":
 
     [A, B, O, t] = run_update_loop()
 
-    print('bilin: ', calc_bilinear_interpol(1, 3, 1, 3, 2.5, 2.5, 0, 10, 20, 50))
+    
 
