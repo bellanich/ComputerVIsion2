@@ -6,6 +6,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 
+# from wisdom import Wisdom
+
 def generate_face(alpha, delta, omega, t):
     """
     :param alpha: a python list
@@ -34,8 +36,9 @@ def calculate_loss(landmarks, ground_truth_landmarks, alpha, delta, L_alpha, L_d
     TODO: expand the loss function to compare 2D vectors in stead of scalars: DONE
     """
 
-    diff = (torch.tensor(landmarks).float() - torch.tensor(ground_truth_landmarks).float())**2
-    landmark_loss = torch.sum(torch.tensor(diff))       
+    diff = (torch.FloatTensor(landmarks) - torch.FloatTensor(ground_truth_landmarks))**2
+    # landmark_loss = torch.sum(torch.tensor(diff))       
+    landmark_loss = torch.sum(diff).float()
 
     alpha_regularization_loss = 0
     for i in range(0,30):
@@ -45,8 +48,15 @@ def calculate_loss(landmarks, ground_truth_landmarks, alpha, delta, L_alpha, L_d
     for i in range(0,20):
         delta_regularization_loss += L_delta * delta[i] ** 2
 
-    return landmark_loss + torch.tensor(alpha_regularization_loss).float() + torch.tensor(delta_regularization_loss).float()
+    # print('diff:', diff)
+    # print('landmark:', type(landmark_loss))
+    # print('alpha:', alpha_regularization_loss)
+    # print('delta:', delta_regularization_loss)
+    # print('sum:', alpha_regularization_loss + delta_regularization_loss)
 
+    return alpha_regularization_loss.float() + delta_regularization_loss.float()
+    # return landmark_loss + alpha_regularization_loss.float() + delta_regularization_loss.float()
+    # return landmark_loss + torch.tensor(alpha_regularization_loss).float() + torch.tensor(delta_regularization_loss).float()
 
 def run_update_loop():
     """Use tensorflow as described in the assignment
@@ -65,26 +75,29 @@ if __name__ == "__main__":
 
     ground_truth_landmarks = face_landmark_detection("./Data/shape_predictor_68_face_landmarks.dat", "./Faces/")
 
-    for loop in range(5):
-    # Start loop for improving Loss - this loops works but does not decrease L_fit yet .
-    # TODO - build convergence criterium
+    alpha = torch.tensor(alpha, requires_grad=True)    
+    delta = torch.tensor(delta, requires_grad=True)
 
-        # I believe we need to have alpha and delta as tensors with gradients from the beginning
-        # and ensure that the function 'generate_face' is robust for tensors 
-        # is this true ? lots of work). 
+    for loop in range(50):
+    # Start loop for improving Loss
+    # TODO - the overall code is ok - build convergence criterium 
+    # TODO - now the loss does not contain landmark_loss. Landmark_loss seems way to large and not converging - so this needs to debugging. - AND: see HINT (translation by -400) 
+    # TODO - ensure the correct initialisation
+
+        # to make it np arrays again, needed for forward pass - function 'generate_face'
+        # .detach to get rid of the gradients, this may cause problem in learning
+        A = alpha.detach().numpy()   
+        B = delta.detach().numpy()       
 
         # forward pass - calculate new values
-        landmarks = generate_face(alpha, delta, [0, 10, 0], [0, 0, 0])
+        landmarks = generate_face(A, B, [0, 10, 0], [0, 0, 0])
 
         # define the Adam optimizer
-        alpha = torch.tensor(alpha, requires_grad=True)    
-        delta = torch.tensor(delta, requires_grad=True)	
-        optimizer = torch.optim.Adam([alpha, delta], lr=0.5)
+        optimizer = torch.optim.Adam([alpha, delta], lr=0.02)
 
 	# calculate loss
         # landmarks = torch.tensor(landmarks, requires_grad=True)
         L_fit = calculate_loss(landmarks, ground_truth_landmarks, alpha, delta, L_alpha, L_delta)
-        # L_fit = torch.autograd.Variable(L_fit, requires_grad=True)      # do not need this anymore, since function 'calculate loss' delivers tensor L_fit
         print('loss:', L_fit)
 
         # backward pass
@@ -93,9 +106,4 @@ if __name__ == "__main__":
 
         # adjust variables
         optimizer.step()                # adjust parameters (alpha, delta)
-
-        # to make it np arrays again, needed for forward pass - function 'generate_face'
-        alpha = alpha.detach().numpy()   
-        delta = delta.detach().numpy()
-
 
