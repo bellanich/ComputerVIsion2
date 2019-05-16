@@ -96,7 +96,7 @@ def face_landmark_detection(predictor_path, faces_folder_path):
         img = dlib.load_rgb_image(f)
 
         win.clear_overlay()
-        win.set_image(img)
+        win.set_image(img)        # displays image
 
         # Ask the detector to find the bounding boxes of each face. The 1 in the
         # second argument indicates that we should upsample the image 1 time. This
@@ -116,7 +116,7 @@ def face_landmark_detection(predictor_path, faces_folder_path):
         win.add_overlay(dets)
         dlib.hit_enter_to_continue()
 
-    return shape_to_np(shape)
+    return shape_to_np(shape), img
 
 
 if __name__ == "__main__":

@@ -6,7 +6,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-# from wisdom import Wisdom
+import matplotlib.pyplot as plt
+from math import pi
 
 def generate_face(alpha, delta, omega, t):
     """
@@ -37,7 +38,6 @@ def calculate_loss(landmarks, ground_truth_landmarks, alpha, delta, L_alpha, L_d
     """
 
     diff = (torch.FloatTensor(landmarks) - torch.FloatTensor(ground_truth_landmarks))**2
-    # landmark_loss = torch.sum(torch.tensor(diff))       
     landmark_loss = torch.sum(diff).float()
 
     alpha_regularization_loss = 0
@@ -48,55 +48,52 @@ def calculate_loss(landmarks, ground_truth_landmarks, alpha, delta, L_alpha, L_d
     for i in range(0,20):
         delta_regularization_loss += L_delta * delta[i] ** 2
 
-    # print('diff:', diff)
-    # print('landmark:', type(landmark_loss))
-    # print('alpha:', alpha_regularization_loss)
-    # print('delta:', delta_regularization_loss)
-    # print('sum:', alpha_regularization_loss + delta_regularization_loss)
+    print('landmark_loss:', landmark_loss)
 
-    return alpha_regularization_loss.float() + delta_regularization_loss.float()
-    # return landmark_loss + alpha_regularization_loss.float() + delta_regularization_loss.float()
-    # return landmark_loss + torch.tensor(alpha_regularization_loss).float() + torch.tensor(delta_regularization_loss).float()
+    return landmark_loss + alpha_regularization_loss.float() + delta_regularization_loss.float()
 
 def run_update_loop():
-    """Use tensorflow as described in the assignment
-    TODO: convert ground_truth_landmarks into XY-coordinates - This is now done in face_landmark_detection.py
-    """
-    ground_truth_landmarks = face_landmark_detection("./Data/shape_predictor_68_face_landmarks.dat", "./Faces/")
-    pass
-
-
-if __name__ == "__main__":
-
+    # init values
     alpha = np.random.uniform(-1, 1, 30)
     delta = np.random.uniform(-1, 1, 20)
-    L_alpha = 0.5
-    L_delta = 0.5
+    L_alpha = 5
+    L_delta = 5
+    transl = [180.0, 150.0, -400.0]		# according to HINT / Peters Golden Hand
+    angles = [0.0, 0.0, 180.0]
 
-    ground_truth_landmarks = face_landmark_detection("./Data/shape_predictor_68_face_landmarks.dat", "./Faces/")
+    # get ground truth and print it
+    ground_truth_landmarks, ground_truth_image = face_landmark_detection("./Data/shape_predictor_68_face_landmarks.dat", "./Faces/")
+    print_image(ground_truth_image, ground_truth_landmarks, 'ground truth landmarks')
 
+    # make tensors
     alpha = torch.tensor(alpha, requires_grad=True)    
     delta = torch.tensor(delta, requires_grad=True)
+    transl = torch.tensor(transl, requires_grad=True)
+    angles = torch.tensor(angles, requires_grad=True)
 
-    for loop in range(50):
-    # Start loop for improving Loss
+    # loop to decrease loss
+    for loop in range(100):
     # TODO - the overall code is ok - build convergence criterium 
-    # TODO - now the loss does not contain landmark_loss. Landmark_loss seems way to large and not converging - so this needs to debugging. - AND: see HINT (translation by -400) 
-    # TODO - ensure the correct initialisation
+    # TODO - now the loss does not contain landmark_loss. Landmark_loss seems way to large and not converging - so this needs to debugging. -  
+    # DONE - ensure the correct initialisation - AND: see HINT (translation by -400)
 
-        # to make it np arrays again, needed for forward pass - function 'generate_face'
-        # .detach to get rid of the gradients, this may cause problem in learning
+        # .detach to get rid of the gradients, needed since 'generate_face only eats np.arrays (A, B, O, t)
         A = alpha.detach().numpy()   
-        B = delta.detach().numpy()       
+        B = delta.detach().numpy()
+        O = angles.detach().numpy()
+        t = transl.detach().numpy()       
 
         # forward pass - calculate new values
-        landmarks = generate_face(A, B, [0, 10, 0], [0, 0, 0])
+        landmarks = generate_face(A, B, O, t)
+
+        # print generated landmarks on ground truth_image
+        if loop % 20 == 0:
+            print_image(ground_truth_image, landmarks, 'landmarks iteration: ' + str(loop))
 
         # define the Adam optimizer
-        optimizer = torch.optim.Adam([alpha, delta], lr=0.02)
+        optimizer = torch.optim.Adam([alpha, delta, transl, angles], lr=0.5)
 
 	# calculate loss
-        # landmarks = torch.tensor(landmarks, requires_grad=True)
         L_fit = calculate_loss(landmarks, ground_truth_landmarks, alpha, delta, L_alpha, L_delta)
         print('loss:', L_fit)
 
@@ -106,4 +103,39 @@ if __name__ == "__main__":
 
         # adjust variables
         optimizer.step()                # adjust parameters (alpha, delta)
+
+    return A, B, O, t
+
+def calc_bilinear_interpol(x1, x2, y1, y2, xc, yc, v11, v12, v21, v22):
+    # function is build for question 5 - NOT YET USED
+    '''
+    calculates the some value vc on coordinates [xc, yc], based on the 4 values on the surrounding corners x1, x2, y1, y2.
+    v11, v12, v21, v22 any float
+    '''
+    # step 1 - check that cx is in between the surrounding corner coordinates
+    if (xc > x1 and x2 >= xc and yc > y1 and y2 >= yc):
+        # step 2 - calc the bilinear interpolation
+        vc1 = (x2-xc)/(x2-x1) * v11 + (xc-x1)/(x2-x1) * v21
+        vc2 = (x2-xc)/(x2-x1) * v12 + (xc-x1)/(x2-x1) * v22
+        vc =  (y2-yc)/(y2-y1) * vc1 + (yc-y1)/(y2-y1) * vc2
+        print(vc1, vc2)
+        return vc
+    else:
+        print('Error: wrong coordinates')
+        return
+
+def print_image(image, landmarks, title):
+    plt.figure()
+    plt.imshow(image)
+    X = landmarks[:, 0]
+    Y = landmarks[:, 1]
+    plt.scatter(X, Y)	
+    plt.title(title)	
+    plt.show()    
+
+if __name__ == "__main__":
+
+    [A, B, O, t] = run_update_loop()
+
+    print('bilin: ', calc_bilinear_interpol(1, 3, 1, 3, 2.5, 2.5, 0, 10, 20, 50))
 
