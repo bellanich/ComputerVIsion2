@@ -1,13 +1,15 @@
 from pinhole_camera_model import run_pinhole_camera
-from mesh_to_png import load_faces
+from mesh_to_png import load_faces, mesh_to_png
 from face_landmark_detection import face_landmark_detection
+
+from data_def import Mesh
 
 import numpy as np
 import torch
 import torch.nn as nn
 
 import matplotlib.pyplot as plt
-from math import pi
+from math import pi, floor, ceil
 
 def generate_face(alpha, delta, omega, t):
     """
@@ -17,12 +19,14 @@ def generate_face(alpha, delta, omega, t):
     :param t: a python list
     :return:
     """
+  
+    # generate face given alpha and delta
     pCid, pCexp, mean_tex, triangles = load_faces(alpha, delta)
-    print('load_faces done.')
+
+    # transform this into 2D with omega and t
     transformed_face, landmarks = run_pinhole_camera(omega, t, pCexp, mean_tex, use_landmarks=True)
 
-    return landmarks
-
+    return landmarks, pCexp, triangles, transformed_face
 
 def calculate_loss(landmarks, ground_truth_landmarks, alpha, delta, L_alpha, L_delta):
     """
@@ -34,7 +38,6 @@ def calculate_loss(landmarks, ground_truth_landmarks, alpha, delta, L_alpha, L_d
     :param L_alpha: a float
     :param L_delta: a float
     :return:
-    TODO: expand the loss function to compare 2D vectors in stead of scalars: DONE
     """
 
     diff = (torch.FloatTensor(landmarks) - torch.FloatTensor(ground_truth_landmarks))**2
@@ -53,6 +56,7 @@ def calculate_loss(landmarks, ground_truth_landmarks, alpha, delta, L_alpha, L_d
     return landmark_loss + alpha_regularization_loss.float() + delta_regularization_loss.float()
 
 def run_update_loop():
+    # This loops finds the best alpha, delta, omega and t (translation) by minimizing error in landmarks
     # init values
     alpha = np.random.uniform(-1, 1, 30)
     delta = np.random.uniform(-1, 1, 20)
@@ -72,7 +76,7 @@ def run_update_loop():
     angles = torch.tensor(angles, requires_grad=True)
 
     # loop to decrease loss
-    for loop in range(100):
+    for loop in range(3):
     # TODO - the overall code is ok - build convergence criterium 
     # TODO - now the loss does not contain landmark_loss. Landmark_loss seems way to large and not converging - so this needs to debugging. -  
     # DONE - ensure the correct initialisation - AND: see HINT (translation by -400)
@@ -84,7 +88,7 @@ def run_update_loop():
         t = transl.detach().numpy()       
 
         # forward pass - calculate new values
-        landmarks = generate_face(A, B, O, t)
+        [landmarks, _, _, _] = generate_face(A, B, O, t)
 
         # print generated landmarks on ground truth_image
         if loop % 20 == 0:
@@ -118,11 +122,41 @@ def calc_bilinear_interpol(x1, x2, y1, y2, xc, yc, v11, v12, v21, v22):
         vc1 = (x2-xc)/(x2-x1) * v11 + (xc-x1)/(x2-x1) * v21
         vc2 = (x2-xc)/(x2-x1) * v12 + (xc-x1)/(x2-x1) * v22
         vc =  (y2-yc)/(y2-y1) * vc1 + (yc-y1)/(y2-y1) * vc2
-        print(vc1, vc2)
         return vc
     else:
         print('Error: wrong coordinates')
         return
+  
+def texture3D(alpha, beta, omega, t):
+    # get ground truth image (again): 784 (x) X 1024 (y) x 3 (RGB)
+    _, gt_image = face_landmark_detection("./Data/shape_predictor_68_face_landmarks.dat", "./Faces/")
+
+    # generate face based on given parameters alpha and beta and transform this face with omage and t. 
+    [landmarks, pCexp, triangles, transformed_face] = generate_face(alpha, beta, omega, t)
+    projection2D = transformed_face[:, :2]     # the 2D projected datapoints (x, y) for each of points in 3D pointcloud pCexp
+
+    # create texture file:
+    [noPoints, _] = np.shape(projection2D)
+    projected_tex = np.zeros((noPoints, 3))   # same size as mean_tex
+
+    # for each point in 2Dprojected generated face, find its texture from the original gt_image by bilinear interpolation
+    for Point in range(noPoints):
+        [xc, yc] = projection2D[Point, :]
+        x1 = floor(xc)
+        x2 = ceil(xc)
+        y1 = floor(yc)
+        y2 = ceil(yc)
+        v11 = gt_image[y1, x1, :]
+        v12 = gt_image[y2, x1, :]
+        v21 = gt_image[y1, x2, :]
+        v22 = gt_image[y2, x2, :]
+        vc = calc_bilinear_interpol(x1, x2, y1, y2, xc, yc, v11, v12, v21, v22)  # vc: dim 3 vector containing RGB values
+        # make this RGB value the value for pointcloud 
+        projected_tex[Point, :] = vc
+    # print the result - RESULTS LOOK FUNNY SINCE I HAVE CHOSEN NOT OPTIMAL PARAMETERS alpha, beta, omega, t
+    mesh = Mesh(pCexp, projected_tex, triangles)
+    mesh_to_png("pCexp_P.png", mesh)
+    return
 
 def print_image(image, landmarks, title):
     plt.figure()
@@ -135,7 +169,11 @@ def print_image(image, landmarks, title):
 
 if __name__ == "__main__":
 
+    # question 4\
     [A, B, O, t] = run_update_loop()
 
-    
+    # question 5
+    texture3D(A, B, O, t)
+
+
 
