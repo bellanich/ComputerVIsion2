@@ -39,9 +39,22 @@ def calculate_loss(landmarks, ground_truth_landmarks, alpha, delta, L_alpha, L_d
     :param L_delta: a float
     :return:
     """
-
+  
+    delta = torch.tensor(delta, requires_grad=True)
     diff = (torch.FloatTensor(landmarks) - torch.FloatTensor(ground_truth_landmarks))**2
     landmark_loss = torch.sum(diff).float()
+    print('landmark_loss', landmark_loss)
+
+    #alternative calculation - NOT USED
+    for i in range(len(landmarks)):
+        difitem = torch.sum(torch.Tensor(landmarks[i, :]) - torch.Tensor(ground_truth_landmarks[i, :]))**2
+        # print(i, landmarks[i, :], ground_truth_landmarks[i, :], difitem)
+        if i == 0:
+            diffs = difitem
+        else:
+            diffs = diffs + difitem
+    landmark_loss1 = diffs
+    # print('landmark_loss1:', landmark_loss1)
 
     alpha_regularization_loss = 0
     for i in range(0,30):
@@ -51,22 +64,23 @@ def calculate_loss(landmarks, ground_truth_landmarks, alpha, delta, L_alpha, L_d
     for i in range(0,20):
         delta_regularization_loss += L_delta * delta[i] ** 2
 
-    print('landmark_loss:', landmark_loss)
-
     return landmark_loss + alpha_regularization_loss.float() + delta_regularization_loss.float()
 
 def run_update_loop():
     # This loops finds the best alpha, delta, omega and t (translation) by minimizing error in landmarks
     # init values
-    alpha = np.random.uniform(-1, 1, 30)
-    delta = np.random.uniform(-1, 1, 20)
-    L_alpha = 5
-    L_delta = 5
-    transl = [110.0, 160.0, -400.0]		# according to HINT / Peters Golden Hand
-    angles = [0.0, 0.0, 180.0]
+    alpha = 0.0 * (np.ones(30))
+    delta = -0.6 * (np.ones(20))
+    L_alpha = 0.5
+    L_delta = 0.5
+    transl = [110.0, 70.0, -400.0]		# according to HINT / Peters Golden Hand
+    angles = [0.0, 5.0, 0.0]
 
     # get ground truth and print it
     ground_truth_landmarks, ground_truth_image = face_landmark_detection("./Data/shape_predictor_68_face_landmarks.dat", "./Faces/")
+    # flip y values of landmarks for making them comparabel with generated landmarks - unclear why landmarks y are mirrored 
+    [_, ySize, _] = np.shape(ground_truth_image) 
+    ground_truth_landmarks[:, 1] = ySize - ground_truth_landmarks[:, 1]
     print_image(ground_truth_image, ground_truth_landmarks, 'ground truth landmarks')
 
     # make tensors
@@ -76,10 +90,9 @@ def run_update_loop():
     angles = torch.tensor(angles, requires_grad=True)
 
     # loop to decrease loss
-    for loop in range(3):
+    for loop in range(60):
     # TODO - the overall code is ok - build convergence criterium 
-    # TODO - now the loss does not contain landmark_loss. Landmark_loss seems way to large and not converging - so this needs to debugging. -  
-    # DONE - ensure the correct initialisation - AND: see HINT (translation by -400)
+    # TODO - Landmark_loss is not converging - so this needs to debugging. -  
 
         # .detach to get rid of the gradients, needed since 'generate_face only eats np.arrays (A, B, O, t)
         A = alpha.detach().numpy()   
@@ -92,10 +105,10 @@ def run_update_loop():
 
         # print generated landmarks on ground truth_image
         if loop % 20 == 0:
-            print_image(ground_truth_image, landmarks, 'landmarks iteration: ' + str(loop))
+            print_image(ground_truth_image, landmarks, 'landmarks iteration: ' + str(loop), flipy=True)
 
         # define the Adam optimizer
-        optimizer = torch.optim.Adam([alpha, delta, transl, angles], lr=0.5)
+        optimizer = torch.optim.Adam([alpha, delta, transl, angles], lr=0.01, weight_decay=0.05)
 
 	# calculate loss
         L_fit = calculate_loss(landmarks, ground_truth_landmarks, alpha, delta, L_alpha, L_delta)
@@ -132,7 +145,7 @@ def texture3D(alpha, beta, omega, t):
     _, gt_image = face_landmark_detection("./Data/shape_predictor_68_face_landmarks.dat", "./Faces/")
 
     # generate face based on given parameters alpha and beta and transform this face with omage and t. 
-    [landmarks, pCexp, triangles, transformed_face] = generate_face(alpha, beta, omega, t)
+    [_, pCexp, triangles, transformed_face] = generate_face(alpha, beta, omega, t)
     projection2D = transformed_face[:, :2]     # the 2D projected datapoints (x, y) for each of points in 3D pointcloud pCexp
 
     # create texture file:
@@ -146,10 +159,11 @@ def texture3D(alpha, beta, omega, t):
         x2 = ceil(xc)
         y1 = floor(yc)
         y2 = ceil(yc)
-        v11 = gt_image[y1, x1, :]
-        v12 = gt_image[y2, x1, :]
-        v21 = gt_image[y1, x2, :]
-        v22 = gt_image[y2, x2, :]
+        [_, ySize, _] = np.shape(gt_image)
+        v11 = gt_image[ySize - y1, x1, :]
+        v12 = gt_image[ySize - y2, x1, :]
+        v21 = gt_image[ySize - y1, x2, :]
+        v22 = gt_image[ySize - y2, x2, :]
         vc = calc_bilinear_interpol(x1, x2, y1, y2, xc, yc, v11, v12, v21, v22)  # vc: dim 3 vector containing RGB values
         # make this RGB value the value for pointcloud 
         projected_tex[Point, :] = vc
@@ -158,11 +172,15 @@ def texture3D(alpha, beta, omega, t):
     mesh_to_png("pCexp_P.png", mesh)
     return
 
-def print_image(image, landmarks, title):
+def print_image(image, landmarks, title, flipy=True):
     plt.figure()
     plt.imshow(image)
     X = landmarks[:, 0]
-    Y = landmarks[:, 1]
+    if flipy:
+    	[_, Ysize, _] = np.shape(image)
+    	Y = Ysize - landmarks[:, 1]
+    else:
+        Y = landmarks[:, 1]
     plt.scatter(X, Y)	
     plt.title(title)	
     plt.show()    

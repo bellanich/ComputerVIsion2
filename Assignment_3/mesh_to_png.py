@@ -79,10 +79,10 @@ if __name__ == '__main__':
     # because of unsolved rendering problem, I need to run this each time to produce an image
 
     imagenr = 6
-    # alpha = (np.ones(30))
-    # delta = (np.ones(20))
-    alpha = np.random.uniform(-1, 1, (30))
-    delta = np.random.uniform(-1, 1, (20))
+    alpha = 0.0 * (np.ones(30))
+    delta = -0.6 * (np.ones(20))
+    # alpha = np.random.uniform(-1, 1, (30))
+    # delta = np.random.uniform(-1, 1, (20))
 
     [_, pCexpression, mean_tex, triangles] = load_faces(alpha, delta)
 
