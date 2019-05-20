@@ -90,7 +90,7 @@ def run_update_loop():
     angles = torch.tensor(angles, requires_grad=True)
 
     # loop to decrease loss
-    for loop in range(60):
+    for loop in range(160):
     # TODO - the overall code is ok - build convergence criterium 
     # TODO - Landmark_loss is not converging - so this needs to debugging. -  
 
@@ -105,7 +105,7 @@ def run_update_loop():
 
         # print generated landmarks on ground truth_image
         if loop % 20 == 0:
-            print_image(ground_truth_image, landmarks, 'landmarks iteration: ' + str(loop), flipy=True)
+            print_image(ground_truth_image, landmarks, 'landmarks iteration: ' + str(loop))
 
         # define the Adam optimizer
         optimizer = torch.optim.Adam([alpha, delta, transl, angles], lr=0.01, weight_decay=0.05)
