@@ -62,7 +62,7 @@ def run_update_loop():
     delta = np.random.uniform(-1, 1, 20)
     L_alpha = 5
     L_delta = 5
-    transl = [180.0, 150.0, -400.0]		# according to HINT / Peters Golden Hand
+    transl = [110.0, 160.0, -400.0]		# according to HINT / Peters Golden Hand
     angles = [0.0, 0.0, 180.0]
 
     # get ground truth and print it

@@ -75,13 +75,21 @@ if __name__ == '__main__':
     # output: only mean_shape)
     # mesh = Mesh(mean_shape, mean_tex, triangles)
 
+    # question 1 - multiple point clouds with several sampled alpha and beta
+    # because of unsolved rendering problem, I need to run this each time to produce an image
+
+    imagenr = 6
+    # alpha = (np.ones(30))
+    # delta = (np.ones(20))
     alpha = np.random.uniform(-1, 1, (30))
     delta = np.random.uniform(-1, 1, (20))
-    [pCidentity, pCexpression, mean_tex, triangles] = load_faces(alpha, delta)
 
-    # output: mean_shape + Eid*[alpha*sigma]
-    mesh = Mesh(pCidentity, mean_tex, triangles)
-    # mesh_to_png("pCid.png", mesh)
+    [_, pCexpression, mean_tex, triangles] = load_faces(alpha, delta)
+
+    mesh = Mesh(pCexpression, mean_tex, triangles)   
+    filename = 'expr'+ str(imagenr)  + '.png'    
+    mesh_to_png(filename, mesh)    
+
 
     # output: all combined
     mesh = Mesh(pCexpression, mean_tex, triangles)

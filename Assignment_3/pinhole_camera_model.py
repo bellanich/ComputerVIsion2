@@ -110,22 +110,28 @@ def run_pinhole_camera(angles, translation, pCexp, mean_tex, use_landmarks=False
 
 if __name__ == "__main__":
 
+    # because of rendering problem I needed to run this program for every mesh_to_png seperately
+
     alpha = np.random.uniform(-1, 1, 30)
     delta = np.random.uniform(-1, 1, 20)
     pCid, pCexp, mean_tex, triangles = load_faces(alpha, delta)
     mesh = Mesh(pCexp, mean_tex, triangles)
-    mesh_to_png('pinhole.png', mesh)
+    # mesh_to_png('pinhole.png', mesh)
 
     translation = [0, 0, 0]
 
+    # -10 degrees around y axis
     transformed_face, _ = run_pinhole_camera([0, -10, 0], translation, pCexp, mean_tex)
     mesh = Mesh(transformed_face[:, :-1], mean_tex, triangles)
-    mesh_to_png('pinhole_-10.png', mesh)
+    # mesh_to_png('pinhole_-10.png', mesh)
 
+    # +10 degrees around y axis
     transformed_face, _ = run_pinhole_camera([0, 10, 0], translation, pCexp, mean_tex)
     mesh = Mesh(transformed_face[:, :-1], mean_tex, triangles)
-    mesh_to_png('pinhole_10.png', mesh)
+    # mesh_to_png('pinhole_10.png', mesh)
 
+    # +10 degrees with landmarks
     transformed_face, _ = run_pinhole_camera([0, 10, 0], translation, pCexp, mean_tex, use_landmarks=True)
     mesh = Mesh(transformed_face[:,:-1], mean_tex, triangles)
     mesh_to_png('pinhole_10_with_landmarks.png', mesh)
+    
