@@ -86,10 +86,14 @@ def shape_to_np(shape, dtype="int"):
 
 
 def face_landmark_detection(predictor_path, faces_folder_path):
+    # return a list of images and a list of landmarks
 
     detector = dlib.get_frontal_face_detector()
     predictor = dlib.shape_predictor(predictor_path)
     win = dlib.image_window()
+
+    list_of_images = []
+    list_of_landmarks = []
 
     for f in glob.glob(os.path.join(faces_folder_path, "*.png")):            # specify image
         print("Processing file: {}".format(f))
@@ -116,7 +120,13 @@ def face_landmark_detection(predictor_path, faces_folder_path):
         win.add_overlay(dets)
         dlib.hit_enter_to_continue()
 
-    return shape_to_np(shape), img
+        landmarks = shape_to_np(shape)
+        list_of_images.append(img)
+        list_of_landmarks.append(landmarks)
+
+    print('number of images loaded: ', len(list_of_images))
+
+    return list_of_landmarks, list_of_images
 
 
 if __name__ == "__main__":

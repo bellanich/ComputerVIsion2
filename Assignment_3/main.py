@@ -66,22 +66,15 @@ def calculate_loss(landmarks, ground_truth_landmarks, alpha, delta, L_alpha, L_d
 
     return landmark_loss + alpha_regularization_loss.float() + delta_regularization_loss.float()
 
-def run_update_loop():
+def run_update_loop(ground_truth_landmarks, ground_truth_image):
     # This loops finds the best alpha, delta, omega and t (translation) by minimizing error in landmarks
     # init values
     alpha = 0.0 * (np.ones(30))
     delta = -0.6 * (np.ones(20))
-    L_alpha = 0.5
-    L_delta = 0.5
+    L_alpha = 1
+    L_delta = 20
     transl = [110.0, 70.0, -400.0]		# according to HINT / Peters Golden Hand
     angles = [0.0, 5.0, 0.0]
-
-    # get ground truth and print it
-    ground_truth_landmarks, ground_truth_image = face_landmark_detection("./Data/shape_predictor_68_face_landmarks.dat", "./Faces/")
-    # flip y values of landmarks for making them comparabel with generated landmarks - unclear why landmarks y are mirrored 
-    [_, ySize, _] = np.shape(ground_truth_image) 
-    ground_truth_landmarks[:, 1] = ySize - ground_truth_landmarks[:, 1]
-    print_image(ground_truth_image, ground_truth_landmarks, 'ground truth landmarks')
 
     # make tensors
     alpha = torch.tensor(alpha, requires_grad=True)    
@@ -89,12 +82,17 @@ def run_update_loop():
     transl = torch.tensor(transl, requires_grad=True)
     angles = torch.tensor(angles, requires_grad=True)
 
+    print('alpha after init tensor:', alpha.requires_grad)
+
     # loop to decrease loss
-    for loop in range(160):
+    for loop in range(2):
     # TODO - the overall code is ok - build convergence criterium 
     # TODO - Landmark_loss is not converging - so this needs to debugging. -  
 
+        ##### BELOW - we need to convert the generate_face function to work with torch.tensors. #####
+
         # .detach to get rid of the gradients, needed since 'generate_face only eats np.arrays (A, B, O, t)
+
         A = alpha.detach().numpy()   
         B = delta.detach().numpy()
         O = angles.detach().numpy()
@@ -103,12 +101,14 @@ def run_update_loop():
         # forward pass - calculate new values
         [landmarks, _, _, _] = generate_face(A, B, O, t)
 
+        ##### ABOVE - we need to convert the genarate_face function to work with torch.tensors. #####
+
         # print generated landmarks on ground truth_image
         if loop % 20 == 0:
             print_image(ground_truth_image, landmarks, 'landmarks iteration: ' + str(loop))
 
         # define the Adam optimizer
-        optimizer = torch.optim.Adam([alpha, delta, transl, angles], lr=0.01, weight_decay=0.05)
+        optimizer = torch.optim.Adam([alpha, delta, transl, angles], lr=0.1, weight_decay=0.05)
 
 	# calculate loss
         L_fit = calculate_loss(landmarks, ground_truth_landmarks, alpha, delta, L_alpha, L_delta)
@@ -140,9 +140,7 @@ def calc_bilinear_interpol(x1, x2, y1, y2, xc, yc, v11, v12, v21, v22):
         print('Error: wrong coordinates')
         return
   
-def texture3D(alpha, beta, omega, t):
-    # get ground truth image (again): 784 (x) X 1024 (y) x 3 (RGB)
-    _, gt_image = face_landmark_detection("./Data/shape_predictor_68_face_landmarks.dat", "./Faces/")
+def texture3D(gt_image, alpha, beta, omega, t):
 
     # generate face based on given parameters alpha and beta and transform this face with omage and t. 
     [_, pCexp, triangles, transformed_face] = generate_face(alpha, beta, omega, t)
@@ -187,11 +185,21 @@ def print_image(image, landmarks, title, flipy=True):
 
 if __name__ == "__main__":
 
-    # question 4\
-    [A, B, O, t] = run_update_loop()
+    # get ground truth images and print it
+    list_of_gt_landmarks, list_of_gt_images = face_landmark_detection("./Data/shape_predictor_68_face_landmarks.dat", "./Faces/")
 
-    # question 5
-    texture3D(A, B, O, t)
+    # go through every image in list (question 6)
+    for ii, gt_image in enumerate(list_of_gt_images):
+        print()
+        print('new image processing.....')
+    	# flip y values of landmarks for making them comparabel with generated landmarks - unclear why landmarks y are mirrored 
+        [_, ySize, _] = np.shape(gt_image) 
+        gt_landmarks = list_of_gt_landmarks[ii]
+        gt_landmarks[:, 1] = ySize - gt_landmarks[:, 1]
+        print_image(gt_image, gt_landmarks, 'ground truth landmarks')
 
+        # question 4
+        [A, B, O, t] = run_update_loop(gt_landmarks, gt_image)
 
-
+        # question 5
+        texture3D(gt_image, A, B, O, t)
