@@ -1,5 +1,7 @@
 import numpy as np
-from math import sin, cos, pi
+import torch
+import torchgeometry as tgm
+from math import sin, cos, tan, pi
 from mesh_to_png import load_faces, mesh_to_png
 from data_def import Mesh
 
@@ -13,10 +15,10 @@ def get_viewport_matrix(vr, vl, vt, vb):
     :param vb:
     :return:
     """
-    return np.array([[(vr - vl)/2, 0,    0, (vr + vl) / 2],
+    return torch.tensor([[(vr - vl)/2, 0,    0, (vr + vl) / 2],
                     [0,  (vt - vb)/2,    0, (vt + vb) / 2],
                     [0,            0,  0.5,           0.5],
-                    [0,            0,    0,             1]])
+                    [0,            0,    0,             1]], dtype=torch.float64)
 
 
 def get_perspective_projection_matrix(r, l, t, b, f, n):
@@ -29,10 +31,10 @@ def get_perspective_projection_matrix(r, l, t, b, f, n):
     :param f:
     :return:
     """
-    return np.array([[2*n / (r - l), 0,  (r + l) / (r - l),                0],
-                     [0, 2*n / (t - b),  (t + b) / (t - b),                0],
-                     [0,             0, (-f - n) / (f - n), -2*f*n / (f - n)],
-                     [0,             0,                 -1,                0]])
+    return torch.tensor([[2*n / (r - l),                     0,                  0, 0],
+                     [0,                     2*n / (t - b),                  0, 0],
+                     [(r + l) / (r - l), (t + b) / (t - b), (-f - n) / (f - n), -1],
+                     [0,                                 0,   -2*f*n / (f - n), 0]], dtype=torch.float64)
 
 
 def get_transformation_matrix(angles, translation):
@@ -42,25 +44,32 @@ def get_transformation_matrix(angles, translation):
     :param translation:
     :return:
     """
-    degree_to_radians = 2 * pi / 360
-    angles = angles * degree_to_radians
+    rtvec = torch.cat((tgm.deg2rad(angles), translation), 0)
+    rtvec = torch.unsqueeze(rtvec, 0)
 
-    Rx = np.array([[1,              0,               0],
-                   [0, cos(angles[0]), -sin(angles[0])],
-                   [0, sin(angles[0]),  cos(angles[0])]])
+    transformation_matrix = tgm.rtvec_to_pose(rtvec)
 
-    Ry = np.array([[cos(angles[1]),  0, sin(angles[1])],
-                   [0,               1,              0],
-                   [-sin(angles[1]), 0, cos(angles[1])]])
+    return transformation_matrix
 
-    Rz = np.array([[cos(angles[2]), -sin(angles[2]), 0],
-                   [sin(angles[2]),  cos(angles[2]), 0],
-                   [0,                            0, 1]])
-
-    rotation = np.matmul(np.matmul(Rx,Ry),Rz)
-
-    return np.append(np.append(rotation, np.zeros((1, 3)), axis=0), np.array([[translation[0]], [translation[1]],
-                                                                              [translation[2]], [1]]), axis=1)
+    # degree_to_radians = 2 * pi / 360.
+    # angles = angles * degree_to_radians
+    #
+    # Rx = np.array([[1,              0,               0],
+    #                [0, cos(angles[0]), -sin(angles[0])],
+    #                [0, sin(angles[0]),  cos(angles[0])]])
+    #
+    # Ry = np.array([[cos(angles[1]),  0, sin(angles[1])],
+    #                [0,               1,              0],
+    #                [-sin(angles[1]), 0, cos(angles[1])]])
+    #
+    # Rz = np.array([[cos(angles[2]), -sin(angles[2]), 0],
+    #                [sin(angles[2]),  cos(angles[2]), 0],
+    #                [0,                            0, 1]])
+    #
+    # rotation = np.matmul(np.matmul(Rx,Ry),Rz)
+    #
+    # return np.append(np.append(rotation, np.zeros((1, 3)), axis=0), np.array([[translation[0]], [translation[1]],
+    #                                                                           [translation[2]], [1]]), axis=1)
 
 
 def load_txt(filename):
@@ -77,35 +86,53 @@ def load_txt(filename):
     return landmarks
 
 
-def run_pinhole_camera(angles, translation, pCexp, mean_tex, use_landmarks=False):
+def run_pinhole_camera(angles, translation, pCexp, mean_tex, use_landmarks=False, test=False):
+
+    fovy = 0.5
+    top = 1.
+    right = top
+    left = bottom = - top
+    near = top / tan(fovy / 2)
+    far = 100
 
     # Add fourth dimension to points
-    pCexp = np.append(pCexp, np.ones((len(pCexp), 1)), axis=-1)
+    pCexp = torch.cat((pCexp, torch.ones((len(pCexp)), 1, dtype=torch.float64)), 1)
 
     # Projection matrix
-    P = get_viewport_matrix(1, -10, 1, -10) * get_perspective_projection_matrix(1, -1, 1, -1, 100, 0.5)
+    V = get_viewport_matrix(1, -10, 1, -10)
+    PP = get_perspective_projection_matrix(1, -1, 1, -1, 100, 0.5)
+    # P = np.matmul(V, PP)
+    P = V * PP
 
     # Transformation matrix
-    T = get_transformation_matrix(np.array(angles), np.array(translation))
+    T = get_transformation_matrix(angles, translation)
 
-    transformed_points = np.empty((0, 4))
-    for i in range(len(pCexp)):
-        transposed_point = np.expand_dims(pCexp[i], 1)
-        transformed_point = np.matmul(np.matmul(P, T), transposed_point)
+    full_transformation_matrix = torch.squeeze(torch.matmul(P, T), 0)
+    pCexp = torch.transpose(pCexp, 0, 1)
+    transformed_pCexp = torch.transpose(torch.matmul(full_transformation_matrix, pCexp), 0, 1)
 
-        transformed_points = np.append(transformed_points, transformed_point.T, axis=0)
+    # transformed_points = np.empty((0, 4))
+    # for i in range(len(pCexp)):
+    #     transposed_point = np.expand_dims(pCexp[i], 1)
+    #     transformed_point = np.matmul(np.matmul(P, T), transposed_point)
+    #
+    #     # transformed_point[0] = transformed_point[0] * transformed_point[2] / transformed_point[3]
+    #     # transformed_point[1] = transformed_point[1] * transformed_point[2] / transformed_point[3]
+    #     # transformed_point[2] = transformed_point[2] / transformed_point[3]
+    #
+    #     transformed_points = np.append(transformed_points, transformed_point.T, axis=0)
 
     if use_landmarks:
         landmark_indices = load_txt('./Data/Landmarks68_model2017-1_face12_nomouth.txt')
 
-        landmarks = transformed_points[landmark_indices][:, :2]
+        landmarks = transformed_pCexp[landmark_indices][:, :2]
 
         for i in range(len(landmark_indices)):
             mean_tex[landmark_indices[i]] = [0, 0, 1]
     else:
         landmarks = None
 
-    return transformed_points, landmarks
+    return transformed_pCexp, landmarks
 
 
 if __name__ == "__main__":
@@ -116,22 +143,22 @@ if __name__ == "__main__":
     delta = np.random.uniform(-1, 1, 20)
     pCid, pCexp, mean_tex, triangles = load_faces(alpha, delta)
     mesh = Mesh(pCexp, mean_tex, triangles)
-    # mesh_to_png('pinhole.png', mesh)
+    mesh_to_png('pinhole__.png', mesh)
 
-    translation = [0, 0, 0]
+    translation = np.array([0, 0, 0])
 
     # -10 degrees around y axis
-    transformed_face, _ = run_pinhole_camera([0, -10, 0], translation, pCexp, mean_tex)
+    transformed_face, _ = run_pinhole_camera(torch.tensor([0, -10, 0]), translation, pCexp, mean_tex, test=True)
     mesh = Mesh(transformed_face[:, :-1], mean_tex, triangles)
-    # mesh_to_png('pinhole_-10.png', mesh)
+    mesh_to_png('pinhole_-10__.png', mesh)
 
     # +10 degrees around y axis
-    transformed_face, _ = run_pinhole_camera([0, 10, 0], translation, pCexp, mean_tex)
+    transformed_face, _ = run_pinhole_camera(torch.tensor([0, 10, 0]), translation, pCexp, mean_tex, test=True)
     mesh = Mesh(transformed_face[:, :-1], mean_tex, triangles)
-    # mesh_to_png('pinhole_10.png', mesh)
+    mesh_to_png('pinhole_10__.png', mesh)
 
     # +10 degrees with landmarks
-    transformed_face, _ = run_pinhole_camera([0, 10, 0], translation, pCexp, mean_tex, use_landmarks=True)
+    transformed_face, _ = run_pinhole_camera(torch.tensor([0, 10, 0]), translation, pCexp, mean_tex, use_landmarks=True, test=True)
     mesh = Mesh(transformed_face[:,:-1], mean_tex, triangles)
-    mesh_to_png('pinhole_10_with_landmarks.png', mesh)
+    mesh_to_png('pinhole_10_with_landmarks__.png', mesh)
     

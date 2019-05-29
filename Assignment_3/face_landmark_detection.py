@@ -56,6 +56,7 @@ import os
 import dlib
 import glob
 import numpy as np
+import pickle
 
 # if len(sys.argv) != 3:
 #     print(
@@ -125,6 +126,10 @@ def face_landmark_detection(predictor_path, faces_folder_path):
         list_of_landmarks.append(landmarks)
 
     print('number of images loaded: ', len(list_of_images))
+
+    with open('landmarks_bella_smile.p', 'wb') as f:
+        pickle.dump(list_of_landmarks, f)
+
 
     return list_of_landmarks, list_of_images
 

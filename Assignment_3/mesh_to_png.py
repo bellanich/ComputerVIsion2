@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import torch
 import trimesh
 import pyrender
 import h5py
@@ -12,49 +13,44 @@ def load_faces(alpha, delta):
 
     # here we load shape/model/mean and convert 3N --> N x 3
 
-    mean_shape = np.asarray(bfm['shape/model/mean'], dtype=np.float32).reshape((-1, 3))
-    size_mean_shape = np.shape(mean_shape)
-
     # here we load the pcabasis and pcavar (reshape it into right tensors, take squareroot of sigma, matrix multiply it.
+    mean_shape = torch.tensor(np.asarray(bfm['shape/model/mean'], dtype=np.float64).reshape((-1, 3)))
+    pcaB_shape = np.asarray(bfm['shape/model/pcaBasis'], dtype=np.float64)
+    pcaVar_shape = np.asarray(bfm['shape/model/pcaVariance'], dtype=np.float64)
+    # here we load for expression: the pcabasis and pcavar (reshape it into right tensors, take squareroot of sigma, matrix multiply it.
+    mean_exp = torch.tensor(np.asarray(bfm['expression/model/mean'], dtype=np.float64).reshape((-1, 3)))
+    pcaB_exp = np.asarray(bfm['expression/model/pcaBasis'], dtype=np.float64)
+    pcaVar_exp = np.asarray(bfm['expression/model/pcaVariance'], dtype=np.float64)
+    # this is standard code to read color/tex and triangles
+    mean_tex = np.asarray(bfm['color/model/mean'], dtype=np.float32).reshape((-1, 3))
+    triangles = np.asarray(bfm['shape/representer/cells'], dtype=np.int32).T
 
-    pcaB_shape = np.asarray(bfm['shape/model/pcaBasis'], dtype=np.float32)
-    nrDim = np.shape(pcaB_shape)[1]
-    pcaB_shape = pcaB_shape.reshape(-1, 3, nrDim)
-    pcaB_shape = pcaB_shape[:, :, :30]
 
-    pcaVar_shape = np.asarray(bfm['shape/model/pcaVariance'], dtype=np.float32)
+    nrDim_shape = np.shape(pcaB_shape)[1]
+    pcaB_shape = pcaB_shape.reshape(-1, 3, nrDim_shape)
+    pcaB_shape = torch.tensor(pcaB_shape[:, :, :30])
+
     pcaVar_shape = pcaVar_shape[:30]
 
-    sigma_shape = alpha * np.sqrt(pcaVar_shape)
-    sigma_shape = np.sqrt(pcaVar_shape)
+    sigma_shape = alpha * torch.sqrt(torch.tensor(pcaVar_shape))
 
-    E_shape_sigma = np.matmul(pcaB_shape, sigma_shape)
+    E_shape_sigma = torch.matmul(pcaB_shape, sigma_shape)
 
     # here we load expression/model/mean and convert 3N --> N x 3
 
-    mean_exp = np.asarray(bfm['expression/model/mean'], dtype=np.float32).reshape((-1, 3))
+    nrDim_exp = np.shape(pcaB_exp)[1]
+    pcaB_exp = pcaB_exp.reshape(-1, 3, nrDim_exp)
+    pcaB_exp = torch.tensor(pcaB_exp[:, :, :20])
 
-    # here we load for expression: the pcabasis and pcavar (reshape it into right tensors, take squareroot of sigma, matrix multiply it.
-
-    pcaB_exp = np.asarray(bfm['expression/model/pcaBasis'], dtype=np.float32)
-    nrDim = np.shape(pcaB_exp)[1]
-    pcaB_exp = pcaB_exp.reshape(-1, 3, nrDim)
-
-    pcaVar_exp = np.asarray(bfm['expression/model/pcaVariance'], dtype=np.float32)
-
-    pcaB_exp = pcaB_exp[:, :, :20]
     pcaVar_exp = pcaVar_exp[:20]
 
-    sigma_exp = delta * np.sqrt(pcaVar_exp)
-    E_exp_sigma = np.matmul(pcaB_exp, sigma_exp)
+    sigma_exp = delta * torch.sqrt(torch.tensor(pcaVar_exp))
+
+    E_exp_sigma = torch.matmul(pcaB_exp, sigma_exp)
 
     # combine mean_shape with Eid*[alpha*sigma]
     pCid = mean_shape + E_shape_sigma
     pCexp = mean_shape + E_shape_sigma + mean_exp + E_exp_sigma
-
-    # this is standard code to read color/tex and triangles
-    mean_tex = np.asarray(bfm['color/model/mean'], dtype=np.float32).reshape((-1, 3))
-    triangles = np.asarray(bfm['shape/representer/cells'], dtype=np.int32).T
 
     return pCid, pCexp, mean_tex, triangles
 
