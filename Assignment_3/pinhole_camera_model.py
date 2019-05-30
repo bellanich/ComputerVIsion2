@@ -34,7 +34,7 @@ def get_perspective_projection_matrix(r, l, t, b, f, n):
     return torch.tensor([[2*n / (r - l),                     0,                  0, 0],
                      [0,                     2*n / (t - b),                  0, 0],
                      [(r + l) / (r - l), (t + b) / (t - b), (-f - n) / (f - n), -1],
-                     [0,                                 0,   -2*f*n / (f - n), 0]], dtype=torch.float64)
+                     [0,                                 0,   -2*f*n / (f - n),  0]], dtype=torch.float64)
 
 
 def get_transformation_matrix(angles, translation):
@@ -111,16 +111,11 @@ def run_pinhole_camera(angles, translation, pCexp, mean_tex, use_landmarks=False
     pCexp = torch.transpose(pCexp, 0, 1)
     transformed_pCexp = torch.transpose(torch.matmul(full_transformation_matrix, pCexp), 0, 1)
 
-    # transformed_points = np.empty((0, 4))
-    # for i in range(len(pCexp)):
-    #     transposed_point = np.expand_dims(pCexp[i], 1)
-    #     transformed_point = np.matmul(np.matmul(P, T), transposed_point)
+    # # for i in range(3):
+    # #     transformed_pCexp[:, i] = transformed_pCexp[:, i] / transformed_pCexp[:, 3]
     #
-    #     # transformed_point[0] = transformed_point[0] * transformed_point[2] / transformed_point[3]
-    #     # transformed_point[1] = transformed_point[1] * transformed_point[2] / transformed_point[3]
-    #     # transformed_point[2] = transformed_point[2] / transformed_point[3]
-    #
-    #     transformed_points = np.append(transformed_points, transformed_point.T, axis=0)
+    # transformed_pCexp[:, 0] = transformed_pCexp[:, 0] * transformed_pCexp[:, 3] / transformed_pCexp[:, 2]
+    # transformed_pCexp[:, 1] = transformed_pCexp[:, 1] * transformed_pCexp[:, 3] / transformed_pCexp[:, 2]
 
     if use_landmarks:
         landmark_indices = load_txt('./Data/Landmarks68_model2017-1_face12_nomouth.txt')
@@ -139,26 +134,25 @@ if __name__ == "__main__":
 
     # because of rendering problem I needed to run this program for every mesh_to_png seperately
 
-    alpha = np.random.uniform(-1, 1, 30)
-    delta = np.random.uniform(-1, 1, 20)
+    alpha = torch.tensor(np.random.uniform(-1, 1, 30), dtype=torch.float64)
+    delta = torch.tensor(np.random.uniform(-1, 1, 20), dtype=torch.float64)
     pCid, pCexp, mean_tex, triangles = load_faces(alpha, delta)
     mesh = Mesh(pCexp, mean_tex, triangles)
     mesh_to_png('pinhole__.png', mesh)
 
-    translation = np.array([0, 0, 0])
+    translation = torch.tensor([0, 0, 0], dtype=torch.float64)
 
     # -10 degrees around y axis
-    transformed_face, _ = run_pinhole_camera(torch.tensor([0, -10, 0]), translation, pCexp, mean_tex, test=True)
+    transformed_face, _ = run_pinhole_camera(torch.tensor([0, -10, 0], dtype=torch.float64), translation, pCexp, mean_tex, test=True)
     mesh = Mesh(transformed_face[:, :-1], mean_tex, triangles)
     mesh_to_png('pinhole_-10__.png', mesh)
 
     # +10 degrees around y axis
-    transformed_face, _ = run_pinhole_camera(torch.tensor([0, 10, 0]), translation, pCexp, mean_tex, test=True)
+    transformed_face, _ = run_pinhole_camera(torch.tensor([0, 10, 0], dtype=torch.float64), translation, pCexp, mean_tex, test=True)
     mesh = Mesh(transformed_face[:, :-1], mean_tex, triangles)
     mesh_to_png('pinhole_10__.png', mesh)
 
     # +10 degrees with landmarks
-    transformed_face, _ = run_pinhole_camera(torch.tensor([0, 10, 0]), translation, pCexp, mean_tex, use_landmarks=True, test=True)
+    transformed_face, _ = run_pinhole_camera(torch.tensor([0, 10, 0], dtype=torch.float64), translation, pCexp, mean_tex, use_landmarks=True, test=True)
     mesh = Mesh(transformed_face[:,:-1], mean_tex, triangles)
     mesh_to_png('pinhole_10_with_landmarks__.png', mesh)
-    
