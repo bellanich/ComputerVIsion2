@@ -3,7 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="1c2e59ab-e924-4020-9d5b-0aea8270f750" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pinhole_camera_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/pinhole_camera_model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/landmarks_bella_smile.p" beforeDir="false" afterPath="$PROJECT_DIR$/landmarks_bella_smile.p" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -14,8 +15,8 @@
   <component name="CoverageDataManager">
     <SUITE FILE_PATH="coverage/Assignment_3$mesh_to_png.coverage" NAME="mesh_to_png Coverage Results" MODIFIED="1557313812764" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Assignment_3$face_landmark_detection.coverage" NAME="face_landmark_detection Coverage Results" MODIFIED="1557744163158" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/Assignment_3$pinhole_camera_model.coverage" NAME="pinhole_camera_model Coverage Results" MODIFIED="1559214423296" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/Assignment_3$main.coverage" NAME="main Coverage Results" MODIFIED="1559156961062" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Assignment_3$pinhole_camera_model.coverage" NAME="pinhole_camera_model Coverage Results" MODIFIED="1559217027968" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Assignment_3$main.coverage" NAME="main Coverage Results" MODIFIED="1559227071345" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="FUSProjectUsageTrigger">
     <session id="-877786290">
@@ -45,15 +46,15 @@
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="Python Console" value="257" />
-          <entry key="py" value="13972" />
+          <entry key="Python Console" value="295" />
+          <entry key="py" value="15957" />
           <entry key="txt" value="2" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="PLAIN_TEXT" value="2" />
-          <entry key="Python" value="14229" />
+          <entry key="Python" value="16252" />
         </counts>
       </usages-collector>
     </session>
@@ -63,8 +64,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/mesh_to_png.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-876">
-              <caret line="7" lean-forward="true" selection-start-line="7" selection-end-line="7" />
+            <state relative-caret-position="-6">
+              <caret line="65" column="20" selection-start-line="65" selection-start-column="20" selection-end-line="65" selection-end-column="20" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
                 <marker date="1559208411777" expanded="true" signature="152:154" ph="..." />
@@ -74,49 +75,28 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/face_landmark_detection.py">
+        <entry file="file://$PROJECT_DIR$/pinhole_camera_model.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1920">
-              <caret line="133" selection-start-line="133" selection-end-line="133" />
+            <state relative-caret-position="1044">
+              <caret line="158" selection-start-line="158" selection-end-line="158" />
               <folding>
-                <element signature="e#2443#2453#0" expanded="true" />
+                <element signature="e#0#18#0" expanded="true" />
+                <marker date="1559214423286" expanded="true" signature="1297:1302" ph="..." />
+                <marker date="1559214423286" expanded="true" signature="2927:4329" ph="..." />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/pinhole_camera_model.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-75">
-              <caret line="91" selection-start-line="91" selection-end-line="92" />
-              <folding>
-                <element signature="e#0#18#0" expanded="true" />
-                <marker date="1559213943527" expanded="true" signature="1297:1302" ph="..." />
-                <marker date="1559213943527" expanded="true" signature="2927:4941" ph="..." />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="225">
-              <caret line="60" column="17" lean-forward="true" selection-start-line="60" selection-start-column="17" selection-end-line="60" selection-end-column="17" />
+            <state relative-caret-position="-758">
+              <caret line="165" column="59" lean-forward="true" selection-start-line="165" selection-start-column="59" selection-end-line="165" selection-end-column="59" />
               <folding>
                 <element signature="e#0#51#0" expanded="true" />
-                <marker date="1559155499876" expanded="true" signature="309:310" ph="..." />
+                <marker date="1559227071341" expanded="true" signature="332:333" ph="..." />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file:///usr/local/lib/python3.6/dist-packages/torchgeometry/core/conversions.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1020">
-              <caret line="71" selection-start-line="71" selection-end-line="71" />
             </state>
           </provider>
         </entry>
@@ -154,8 +134,8 @@
         <option value="$PROJECT_DIR$/requirements.txt" />
         <option value="$PROJECT_DIR$/face_landmark_detection.py" />
         <option value="$PROJECT_DIR$/mesh_to_png.py" />
-        <option value="$PROJECT_DIR$/main.py" />
         <option value="$PROJECT_DIR$/pinhole_camera_model.py" />
+        <option value="$PROJECT_DIR$/main.py" />
       </list>
     </option>
   </component>
@@ -196,7 +176,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.pinhole_camera_model">
+  <component name="RunManager" selected="Python.main">
     <configuration name="face_landmark_detection" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="Assignment_3" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -293,8 +273,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.pinhole_camera_model" />
         <item itemvalue="Python.main" />
+        <item itemvalue="Python.pinhole_camera_model" />
         <item itemvalue="Python.face_landmark_detection" />
         <item itemvalue="Python.mesh_to_png" />
       </list>
@@ -324,6 +304,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="25" width="1920" height="1055" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info id="Favorites" order="0" side_tool="true" />
       <window_info content_ui="combo" id="Project" order="1" weight="0.22678763" />
@@ -332,7 +313,7 @@
       <window_info anchor="bottom" id="Terminal" order="1" weight="0.32878152" />
       <window_info anchor="bottom" id="Version Control" order="2" show_stripe_button="false" />
       <window_info anchor="bottom" id="Event Log" order="3" sideWeight="0.50053364" side_tool="true" weight="0.4" />
-      <window_info anchor="bottom" id="Python Console" order="4" weight="0.32878152" />
+      <window_info anchor="bottom" id="Python Console" order="4" weight="0.32864866" />
       <window_info anchor="bottom" id="Docker" order="5" show_stripe_button="false" />
       <window_info anchor="bottom" id="Message" order="6" />
       <window_info anchor="bottom" id="Find" order="7" />
@@ -344,7 +325,7 @@
       <window_info anchor="bottom" id="TODO" order="13" weight="0.32983193" />
       <window_info anchor="right" id="R Graphics" order="0" weight="0.32975337" />
       <window_info anchor="right" id="R Packages" order="1" weight="0.32975337" />
-      <window_info anchor="right" id="SciView" order="2" visible="true" weight="0.3601921" />
+      <window_info anchor="right" id="SciView" order="2" weight="0.3601921" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="3" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="4" weight="0.25" />
       <window_info anchor="right" id="Database" order="5" />
@@ -455,7 +436,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/face_landmark_detection.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1920">
+        <state relative-caret-position="279">
           <caret line="133" selection-start-line="133" selection-end-line="133" />
           <folding>
             <element signature="e#2443#2453#0" expanded="true" />
@@ -465,15 +446,27 @@
     </entry>
     <entry file="file:///usr/local/lib/python3.6/dist-packages/torchgeometry/core/conversions.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1020">
+        <state relative-caret-position="474">
           <caret line="71" selection-start-line="71" selection-end-line="71" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pinhole_camera_model.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1044">
+          <caret line="158" selection-start-line="158" selection-end-line="158" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+            <marker date="1559214423286" expanded="true" signature="1297:1302" ph="..." />
+            <marker date="1559214423286" expanded="true" signature="2927:4329" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/mesh_to_png.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-876">
-          <caret line="7" lean-forward="true" selection-start-line="7" selection-end-line="7" />
+        <state relative-caret-position="-6">
+          <caret line="65" column="20" selection-start-line="65" selection-start-column="20" selection-end-line="65" selection-end-column="20" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
             <marker date="1559208411777" expanded="true" signature="152:154" ph="..." />
@@ -483,23 +476,11 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="225">
-          <caret line="60" column="17" lean-forward="true" selection-start-line="60" selection-start-column="17" selection-end-line="60" selection-end-column="17" />
+        <state relative-caret-position="-758">
+          <caret line="165" column="59" lean-forward="true" selection-start-line="165" selection-start-column="59" selection-end-line="165" selection-end-column="59" />
           <folding>
             <element signature="e#0#51#0" expanded="true" />
-            <marker date="1559155499876" expanded="true" signature="309:310" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/pinhole_camera_model.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-75">
-          <caret line="91" selection-start-line="91" selection-end-line="92" />
-          <folding>
-            <element signature="e#0#18#0" expanded="true" />
-            <marker date="1559213943527" expanded="true" signature="1297:1302" ph="..." />
-            <marker date="1559213943527" expanded="true" signature="2927:4941" ph="..." />
+            <marker date="1559227071341" expanded="true" signature="332:333" ph="..." />
           </folding>
         </state>
       </provider>

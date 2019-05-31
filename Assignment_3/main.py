@@ -11,6 +11,8 @@ import torch.nn as nn
 import matplotlib.pyplot as plt
 from math import pi, floor, ceil
 
+from time import time
+
 
 def generate_face(alpha, delta, angles, translation):
     """
@@ -30,7 +32,7 @@ def generate_face(alpha, delta, angles, translation):
     return landmarks, pCexp, triangles, transformed_face
 
 
-def calculate_loss(landmarks, ground_truth_landmarks, alpha, delta, translation, angles, L_alpha, L_delta):
+def calculate_loss(landmarks, ground_truth_landmarks, alpha, delta, L_alpha, L_delta):
     """
     Calculate the loss function of an ensemble of landmarks with respect to the ground truth landmarks
     :param landmarks: a numpy array
@@ -56,15 +58,15 @@ def calculate_loss(landmarks, ground_truth_landmarks, alpha, delta, translation,
     return landmark_loss + alpha_regularization_loss.float() + delta_regularization_loss.float()
 
 
-def run_update_loop(ground_truth_landmarks, ground_truth_image):
+def run_update_loop(ground_truth_landmarks, ground_truth_images):
     # This loops finds the best alpha, delta, omega and t (translation) by minimizing error in landmarks
     # init values
     alpha           = torch.tensor(np.random.uniform(-1, 1, 30), requires_grad=True)
-    delta           = torch.tensor(np.random.uniform(-1, 1, 20), requires_grad=True)
+    delta           = torch.empty(30)
     L_alpha         = 1
     L_delta         = 20
-    translation     = torch.tensor([124.0, 90.0, -400.0], requires_grad=True, dtype=torch.float64)		# according to HINT / Peters Golden Hand
-    angles          = torch.tensor([0.0,    5.0,    0.0], requires_grad=True, dtype=torch.float64)
+    angles          = torch.empty(3)
+    translation     = torch.empty(3)
     learning_rate   = 0.01
     weight_decay    = 0.05
 
@@ -77,41 +79,77 @@ def run_update_loop(ground_truth_landmarks, ground_truth_image):
     # define the Adam optimizer
     optimizer = torch.optim.Adam([alpha, delta, translation, angles], lr=learning_rate, weight_decay=weight_decay)
 
-    loss_archive = []
+    delta_archive = []
+    translation_archive = []
+    angles_archive = []
 
-    # loop to decrease loss
-    loss_diff = 1
-    old_loss = 10000000000
-    iteration = 0
-    while loss_diff > 0.001 and iteration < 10000:
+    # # go through every image in list (question 6)
+    # for ii, gt_image in enumerate(list_of_gt_images):
+    #     print()
+    #     print('new image processing.....')
+    #     # flip y values of landmarks for making them comparabel with generated landmarks - unclear why landmarks y are mirrored
+    #     [_, ySize, _] = np.shape(gt_image)
+    #     gt_landmarks = list_of_gt_landmarks[ii]
+    #     gt_landmarks[:, 1] = ySize - gt_landmarks[:, 1]
+    #     print_image(gt_image, torch.tensor(gt_landmarks), 'ground truth landmarks')
 
-        # forward pass - calculate new values
-        [landmarks, _, _, _] = generate_face(alpha, delta, angles, translation)
+    for image_index in range(len(ground_truth_images)):
 
-        # print generated landmarks on ground truth_image
-        if iteration % 500 == 0:
-            print_image(ground_truth_image, landmarks, 'landmarks iteration: ' + str(iteration))
+        # turn ground truth landmarks into a tensor
+        ground_truth_landmarks_ = torch.tensor(ground_truth_landmarks[image_index], dtype=torch.float64)
 
-        # calculate loss
-        L_fit = calculate_loss(landmarks, ground_truth_landmarks, alpha, delta, translation, angles, L_alpha, L_delta)
+        # initialize an archive for the loss value
+        loss_archive = []
 
-        # backward pass
-        optimizer.zero_grad()       # reset gradients
-        L_fit.backward()   		    # compute the gradients
+        # re-initialize delta, tranlation and rotation for each individual image
+        delta = torch.tensor(np.random.uniform(-1, 1, 20), requires_grad=True)
+        translation = torch.tensor([124.0, 90.0, -400.0], requires_grad=True, dtype=torch.float64)
+        angles = torch.tensor([0.0, 5.0, 0.0], requires_grad=True, dtype=torch.float64)
 
-        # adjust variables
-        optimizer.step()            # adjust parameters (alpha, delta)
+        # loop to decrease loss
+        loss_diff = 1
+        old_loss = 1000000000000000000
+        iteration = 0
+        while abs(loss_diff) > 0.001 and iteration < 20000:
 
-        # update convergence parameters and display loss
-        loss_diff = old_loss - L_fit
-        old_loss = L_fit
-        loss_archive.append(L_fit)
-        print('loss:', L_fit)
+            # forward pass - calculate new values
+            [landmarks, _, _, _] = generate_face(alpha, delta, angles, translation)
 
-    plt.figure()
-    plt.plot(loss_archive)
-    plt.show()
-    return alpha, delta, angles, translation
+            # # print generated landmarks on ground truth_image
+            if iteration % 500 == 0:
+                print_image(ground_truth_images[image_index], landmarks, 'landmarks iteration: ' + str(iteration), 1, image_index, iteration)
+
+            # calculate loss
+            L_fit = calculate_loss(landmarks, ground_truth_landmarks_, alpha, angles, L_alpha, L_delta)
+
+            # backward pass, L_fit
+            optimizer.zero_grad()       # reset gradients
+            L_fit.backward()   		    # compute the gradients
+
+            # adjust variables
+            optimizer.step()            # adjust parameters (alpha, delta)
+
+            # update convergence parameters and display loss
+            loss_diff = old_loss - L_fit
+            old_loss = L_fit
+            loss_archive.append(L_fit)
+            if iteration % 500 == 0:
+                print('iteration: {} loss: {}'.format(iteration, L_fit))
+
+            iteration += 1
+
+        print_image(ground_truth_images[image_index], landmarks, 'landmarks iteration: {}'.format(iteration), 1, image_index, iteration)
+
+        delta_archive.append(delta)
+        translation_archive.append(translation)
+        angles_archive.append(angles)
+
+        plt.figure()
+        plt.plot(loss_archive)
+        plt.savefig('./output/loss/1_{}.png'.format(image_index))
+        plt.close()
+
+    return alpha, delta_archive, angles_archive, translation_archive
 
 
 def calc_bilinear_interpol(x1, x2, y1, y2, xc, yc, v11, v12, v21, v22):
@@ -132,7 +170,7 @@ def calc_bilinear_interpol(x1, x2, y1, y2, xc, yc, v11, v12, v21, v22):
         return
 
 
-def texture3D(gt_image, alpha, beta, omega, t):
+def texture3D(gt_image, alpha, beta, omega, t, i):
 
     # generate face based on given parameters alpha and beta and transform this face with omage and t. 
     [_, pCexp, triangles, transformed_face] = generate_face(alpha, beta, omega, t)
@@ -162,11 +200,11 @@ def texture3D(gt_image, alpha, beta, omega, t):
         projected_tex[Point, :] = vc
     # print the result - RESULTS LOOK FUNNY SINCE I HAVE CHOSEN NOT OPTIMAL PARAMETERS alpha, beta, omega, t
     mesh = Mesh(pCexp, projected_tex, triangles)
-    mesh_to_png("pCexp_P.png", mesh)
+    mesh_to_png("./output/generated_faces/run_1_face_{}.png".format(i), mesh)
     return
 
 
-def print_image(image, landmarks, title, flipy=True):
+def print_image(image, landmarks, title, run, image_index, iteration, flipy=True):
     plt.figure()
     plt.imshow(image)
 
@@ -182,26 +220,27 @@ def print_image(image, landmarks, title, flipy=True):
         Y = data[:, 1]
     plt.scatter(X, Y)	
     plt.title(title)	
-    plt.show()    
+    plt.savefig('./output/intermediate_images/run_{}_face_{}_{}.png'.format(run, image_index, iteration))
+    plt.close()
 
 
 if __name__ == "__main__":
 
-    # get ground truth images and print it
+    # get ground truth images and landmarks from images in {CWD}/Faces/ directory
+    # NB: all images should be of the same person, since we will train alpha (facial identity) on these images
     list_of_gt_landmarks, list_of_gt_images = face_landmark_detection("./Data/shape_predictor_68_face_landmarks.dat", "./Faces/")
 
-    # go through every image in list (question 6)
     for ii, gt_image in enumerate(list_of_gt_images):
-        print()
-        print('new image processing.....')
         # flip y values of landmarks for making them comparabel with generated landmarks - unclear why landmarks y are mirrored
-        [_, ySize, _] = np.shape(gt_image) 
+        [_, ySize, _] = np.shape(gt_image)
         gt_landmarks = list_of_gt_landmarks[ii]
         gt_landmarks[:, 1] = ySize - gt_landmarks[:, 1]
-        print_image(gt_image, torch.tensor(gt_landmarks), 'ground truth landmarks')
 
-        # question 4
-        [alpha, delta, angles, translation] = run_update_loop(torch.tensor(gt_landmarks, dtype=torch.float64), gt_image)
+    # question 4
+    print("Training")
+    [alpha, delta_archive, angles_archive, translation_archive] = run_update_loop(list_of_gt_landmarks, list_of_gt_images)
 
-        # question 5
-        texture3D(gt_image, alpha, delta, angles, translation)
+    # question 5
+    print("generating textured images")
+    for i, image in enumerate(list_of_gt_images):
+        texture3D(image, alpha, delta_archive[i], angles_archive[i], translation_archive[i], i)
